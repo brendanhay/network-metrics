@@ -19,7 +19,7 @@ description:
     Supported services are Ganglia, Graphite, and statsd.
     .
     These modules are intended to be imported qualified, to avoid name
-    clashes with other module, e.g.
+    clashes with other modules, e.g.
     .
     > import qualified Network.Metrics.Ganglia  as A
     > import qualified Network.Metrics.Graphite as B
