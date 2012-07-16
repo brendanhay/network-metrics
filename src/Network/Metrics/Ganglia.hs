@@ -31,17 +31,17 @@ module Network.Metrics.Ganglia (
     , I.close
     ) where
 
-import Control.Concurrent             (threadDelay)
-import Control.Monad                  (unless, liftM)
+import Control.Concurrent (threadDelay)
+import Control.Monad      (unless, liftM)
 import Data.Binary.Put
-import Data.Bits                      ((.&.))
-import Data.Char                      (toLower)
-import Data.Data                      (Data, Typeable)
-import Data.Default                   (Default, def)
-import Data.Int                       (Int32)
-import Data.Word                      (Word32)
+import Data.Bits          ((.&.))
+import Data.Char          (toLower)
+import Data.Data          (Data, Typeable)
+import Data.Default       (Default, def)
+import Data.Int           (Int32)
+import Data.Word          (Word32)
 import Network.Socket
-import System.Random                  (randomRIO)
+import System.Random      (randomRIO)
 
 import qualified Data.ByteString          as B
 import qualified Data.ByteString.Char8    as BS
