@@ -45,6 +45,9 @@ open = I.open Stream
 
 -- | Emit a metric's metadata and value on the specified socket handle
 emit :: Metric -> I.Handle -> IO I.Handle
-emit Metric{..} = do
+emit Metric{..} handle = do
     time <- getPOSIXTime
-    I.emit $ BL.fromChunks [metricBucket, metricValue, truncate time]
+    I.emit (encoded time) handle
+  where
+    encoded n   = BL.fromChunks [metricBucket, metricValue, timestamp n]
+    timestamp n = BS.pack $ show (truncate n :: Integer)

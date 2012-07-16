@@ -40,8 +40,7 @@ import Data.Data                      (Data, Typeable)
 import Data.Default                   (Default, def)
 import Data.Int                       (Int32)
 import Data.Word                      (Word32)
-import Network.Socket          hiding (send)
-import Network.Socket.ByteString.Lazy (send)
+import Network.Socket
 import System.Random                  (randomRIO)
 
 import qualified Data.ByteString          as B
@@ -94,15 +93,15 @@ defaultMetric = Metric
     }
 
 -- | Create a new unconnected socket handle for UDP communication
-open :: String -> String -> IO Handle
-open host port = I.open host port
+open :: String -> String -> IO I.Handle
+open = I.open Datagram
 
 -- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> Handle -> IO Handle
-emit metric handle@(Handle sock addr) = do
+emit :: Metric -> I.Handle -> IO I.Handle
+emit metric handle@(I.Handle sock addr) = do
     sIsConnected sock >>= \b -> unless b $ connect sock addr
-    _ <- push putMetaData
-    _ <- push putMetric
+    _ <- push putMetaData handle
+    _ <- push putMetric handle
     return handle
   where
     push fn = I.emit . runPut $ fn metric

@@ -54,9 +54,9 @@ open = I.open Datagram
 emit :: Metric -> I.Handle -> IO I.Handle
 emit metric handle = do
     rand <- randomRIO (0.0, 1.0)
-    I.emit (parts rand) handle
+    I.emit (encoded rand) handle
   where
-    parts = BL.fromChunks . components metric . sample (metricRate metric)
+    encoded = BL.fromChunks . components metric . sample (metricRate metric)
 
 --
 -- Sampling
