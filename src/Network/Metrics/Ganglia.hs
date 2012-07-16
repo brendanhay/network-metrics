@@ -97,12 +97,12 @@ open :: String -> String -> IO I.Handle
 open = I.open Datagram
 
 -- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> I.Handle -> IO I.Handle
+emit :: Metric -> I.Handle -> IO ()
 emit metric handle@(I.Handle sock addr) = do
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- push putMetaData handle
     _ <- push putMetric handle
-    return handle
+    return ()
   where
     push fn = I.emit . runPut $ fn metric
 
@@ -204,6 +204,6 @@ test host port = open host port >>= loop
     loop h = do
         r <- randomRIO variance :: IO Int
         n <- sample ["magic", "candy", "unicorns"]
-        f <- emit defaultMetric { name = n, value = BS.pack $ show r } h
+        emit defaultMetric { name = n, value = BS.pack $ show r } h
         threadDelay oneSecond
-        loop f
+        loop h

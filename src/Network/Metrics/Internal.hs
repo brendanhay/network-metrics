@@ -45,9 +45,9 @@ close :: Handle -> IO ()
 close (Handle sock _) = sClose sock
 
 -- | Push an encoded metric to the specified socket handle
-emit :: BL.ByteString -> Handle -> IO Handle
-emit bstr handle@(Handle sock addr) | BL.null bstr = return handle
-                                    | otherwise    = do
+emit :: BL.ByteString -> Handle -> IO ()
+emit bstr (Handle sock addr) | BL.null bstr = return ()
+                             | otherwise    = do
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- send sock bstr
-    return handle
+    return ()

@@ -44,7 +44,7 @@ open :: String -> String -> IO I.Handle
 open = I.open Stream
 
 -- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> I.Handle -> IO I.Handle
+emit :: Metric -> I.Handle -> IO ()
 emit Metric{..} handle = do
     time <- getPOSIXTime
     I.emit (encoded time) handle

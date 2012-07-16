@@ -48,7 +48,10 @@ main = parse >>= emit
 --
 
 emit :: Options -> IO ()
-emit Options{..} = G.open optHost optPort >>= G.emit metric >>= G.close
+emit Options{..} = do
+    handle <- G.open optHost optPort
+    G.emit metric handle
+    G.close handle
   where
     metric = G.Metric
         (pack optName)

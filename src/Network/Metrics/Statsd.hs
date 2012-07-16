@@ -51,7 +51,7 @@ open :: String -> String -> IO I.Handle
 open = I.open Datagram
 
 -- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> I.Handle -> IO I.Handle
+emit :: Metric -> I.Handle -> IO ()
 emit metric handle = do
     rand <- randomRIO (0.0, 1.0)
     I.emit (encoded rand) handle
