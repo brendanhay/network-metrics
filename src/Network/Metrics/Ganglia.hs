@@ -1,5 +1,5 @@
 -- |
--- Module      : Monitor.Ganglia
+-- Module      : Network.Metrics.Ganglia
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Monitor.Ganglia (
+module Network.Metrics.Ganglia (
     -- * Exported types
       Slope(..)
     , MetricType(..)
@@ -46,7 +46,7 @@ import System.Random                  (randomRIO)
 
 import qualified Data.ByteString       as B
 import qualified Data.ByteString.Char8 as BS
-import qualified Vigil.Internal        as I
+import qualified Network.Metrics.Internal        as I
 
 -- | Allows gmetad and the PHP webfrontend to efficiently separate
 -- constant data metrics from volatile ones

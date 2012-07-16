@@ -1,5 +1,5 @@
 -- |
--- Module      : Monitor.Statsd
+-- Module      : Network.Metrics.Statsd
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Monitor.Statsd (
+module Network.Metrics.Statsd (
     -- * Exported types
       MetricType
     , Metric(..)
@@ -29,7 +29,7 @@ import System.Random (randomRIO)
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Vigil.Internal             as I
+import qualified Network.Metrics.Internal             as I
 
 data MetricType = Counter | Timer | Gauge deriving (Show)
 

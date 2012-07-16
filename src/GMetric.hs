@@ -20,7 +20,7 @@ import System.Console.CmdArgs
 import System.Environment     (getArgs, withArgs)
 import System.Exit            (ExitCode(..), exitWith)
 
-import qualified Monitor.Ganglia as G
+import qualified Network.Metrics.Ganglia as G
 
 data Options = Options
     { optHost  :: String

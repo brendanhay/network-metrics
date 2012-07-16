@@ -1,5 +1,5 @@
 -- |
--- Module      : Monitor.Graphite
+-- Module      : Network.Metrics.Graphite
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Monitor.Graphite (
+module Network.Metrics.Graphite (
     -- * Exported types
       Metric(..)
 
@@ -28,7 +28,7 @@ import Data.Time.Clock.POSIX
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Vigil.Internal             as I
+import qualified Network.Metrics.Internal             as I
 
 data Metric = Metric
     { metricBucket :: BS.ByteString

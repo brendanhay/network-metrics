@@ -1,5 +1,5 @@
 -- |
--- Module      : Vigil.Internal
+-- Module      : Network.Metrics.Internal
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Vigil.Internal (
+module Network.Metrics.Internal (
     -- * Exported types
       Handle(..)
 

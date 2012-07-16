@@ -1,4 +1,4 @@
-name:               vigil
+name:               network-metrics
 version:            0.1.0
 synopsis:           Send metrics to Ganglia, Graphite, and statsd
 description:        Send metrics directly from Haskell various monitoring and metrics services over TCP and UDP
@@ -6,8 +6,8 @@ license:            OtherLicense
 license-file:       LICENSE
 author:             Brendan Hay <brendan@soundcloud.com>
 maintainer:         Brendan Hay <brendan@soundcloud.com>
-homepage:           http://github.com/brendanhay/vigil
-bug-reports:        http://github.com/brendanhay/vigil/issues
+homepage:           http://github.com/brendanhay/network-metrics
+bug-reports:        http://github.com/brendanhay/network-metrics/issues
 category:           Metrics, Monitoring
 stability:          Experimental
 build-type:         Simple
@@ -17,12 +17,12 @@ extra-source-files: README.md
 
 source-repository head
   type:     git
-  location: git://github.com/brendanhay/vigil.git
+  location: git://github.com/brendanhay/network-metrics.git
 
 library
-  exposed-modules:  Monitor.Ganglia.GMetric
-                  , Monitor.Graphite.Statsd
-                  , Monitor.Graphite.Direct
+  exposed-modules:  Network.Metrics.Ganglia
+                  , Network.Metrics.Graphite
+                  , Network.Metrics.Statsd
 
   hs-source-dirs:   src
 
