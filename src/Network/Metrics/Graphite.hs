@@ -31,8 +31,8 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 import qualified Network.Metrics.Internal   as I
 
 data Metric = Metric
-    { metricBucket :: BS.ByteString
-    , metricValue  :: BS.ByteString
+    { bucket :: BS.ByteString
+    , value  :: BS.ByteString
     } deriving (Show)
 
 --
@@ -49,5 +49,5 @@ emit Metric{..} handle = do
     time <- getPOSIXTime
     I.emit (encoded time) handle
   where
-    encoded n   = BL.fromChunks [metricBucket, metricValue, timestamp n]
+    encoded n   = BL.fromChunks [bucket, value, timestamp n]
     timestamp n = BS.pack $ show (truncate n :: Integer)

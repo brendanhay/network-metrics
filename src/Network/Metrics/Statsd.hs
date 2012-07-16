@@ -34,10 +34,10 @@ import qualified Network.Metrics.Internal   as I
 data MetricType = Counter | Timer | Gauge deriving (Show)
 
 data Metric = Metric
-    { metricType   :: MetricType
-    , metricBucket :: BS.ByteString
-    , metricValue  :: Integer
-    , metricRate   :: Double
+    { type'  :: MetricType
+    , bucket :: BS.ByteString
+    , value  :: Integer
+    , rate   :: Double
     } deriving (Show)
 
 data Sampled = Sampled | Exact | Ignore
@@ -56,7 +56,7 @@ emit metric handle = do
     rand <- randomRIO (0.0, 1.0)
     I.emit (encoded rand) handle
   where
-    encoded = BL.fromChunks . components metric . sample (metricRate metric)
+    encoded = BL.fromChunks . components metric . sample (rate metric)
 
 --
 -- Sampling
@@ -69,11 +69,11 @@ sample rate rand | rate < 1.0 && rand <= rate = Sampled
 
 components :: Metric -> Sampled -> [BS.ByteString]
 components Metric{..} sampled = case sampled of
-    Sampled -> base ++ ["@", BS.pack $ show metricRate]
+    Sampled -> base ++ ["@", BS.pack $ show rate]
     Exact   -> base
     Ignore  -> []
   where
-    base = [metricBucket, ":", BS.pack $ show metricValue, "|", suffix metricType]
+    base = [bucket, ":", BS.pack $ show value, "|", suffix type']
 
 suffix :: MetricType -> BS.ByteString
 suffix typ = case typ of
