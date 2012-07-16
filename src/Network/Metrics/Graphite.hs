@@ -28,7 +28,7 @@ import Data.Time.Clock.POSIX
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Network.Metrics.Internal             as I
+import qualified Network.Metrics.Internal   as I
 
 data Metric = Metric
     { metricBucket :: BS.ByteString

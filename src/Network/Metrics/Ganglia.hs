@@ -44,9 +44,9 @@ import Network.Socket          hiding (send)
 import Network.Socket.ByteString.Lazy (send)
 import System.Random                  (randomRIO)
 
-import qualified Data.ByteString       as B
-import qualified Data.ByteString.Char8 as BS
-import qualified Network.Metrics.Internal        as I
+import qualified Data.ByteString          as B
+import qualified Data.ByteString.Char8    as BS
+import qualified Network.Metrics.Internal as I
 
 -- | Allows gmetad and the PHP webfrontend to efficiently separate
 -- constant data metrics from volatile ones

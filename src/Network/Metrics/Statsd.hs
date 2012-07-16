@@ -29,7 +29,7 @@ import System.Random (randomRIO)
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Network.Metrics.Internal             as I
+import qualified Network.Metrics.Internal   as I
 
 data MetricType = Counter | Timer | Gauge deriving (Show)
 
