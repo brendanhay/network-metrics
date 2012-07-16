@@ -59,7 +59,7 @@ emit metric handle = do
     parts = BL.fromChunks . components metric . sample (metricRate metric)
 
 --
--- Binary Encoding
+-- Sampling
 --
 
 sample :: Double -> Double -> Sampled
