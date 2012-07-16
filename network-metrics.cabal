@@ -1,7 +1,6 @@
 name:               network-metrics
 version:            0.1.0
-synopsis:           Send metrics to Ganglia, Graphite, and statsd
-description:        Send metrics directly from Haskell various monitoring and metrics services over TCP and UDP
+synopsis:           Send metrics to Ganglia, Graphite, and statsd.
 license:            OtherLicense
 license-file:       LICENSE
 author:             Brendan Hay <brendan@soundcloud.com>
@@ -12,6 +11,19 @@ category:           Metrics, Monitoring
 stability:          Experimental
 build-type:         Simple
 cabal-version:      >= 1.10
+
+description:
+    .
+    Send metrics directly from Haskell various monitoring and metrics services.
+    .
+    Supported services are Ganglia, Graphite, and statsd.
+    .
+    These modules are intended to be imported qualified, to avoid name
+    clashes with other module, e.g.
+    .
+    > import qualified Network.Metrics.Ganglia  as A
+    > import qualified Network.Metrics.Graphite as B
+    > import qualified Network.Metrics.Statsd   as C
 
 extra-source-files: README.md
 
