@@ -56,7 +56,7 @@ emit metric handle = do
     rand <- randomRIO (0.0, 1.0)
     I.emit (encoded rand) handle
   where
-    encoded = BL.fromChunks . components metric . sample (rate metric)
+    encoded = BL.fromChunks . chunks metric . sample (rate metric)
 
 --
 -- Sampling
@@ -67,8 +67,8 @@ sample rate rand | rate < 1.0 && rand <= rate = Sampled
                  | rate == 1.0                = Exact
                  | otherwise                  = Ignore
 
-components :: Metric -> Sampled -> [BS.ByteString]
-components Metric{..} sampled = case sampled of
+chunks :: Metric -> Sampled -> [BS.ByteString]
+chunks Metric{..} sampled = case sampled of
     Sampled -> base ++ ["@", BS.pack $ show rate]
     Exact   -> base
     Ignore  -> []
