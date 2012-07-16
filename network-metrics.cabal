@@ -35,7 +35,7 @@ library
   exposed-modules:  Network.Metrics.Ganglia
                   , Network.Metrics.Graphite
                   , Network.Metrics.Statsd
-  other-modules:    Network.Metrics.Internal
+                  , Network.Metrics.Internal
 
   hs-source-dirs:   src
 

@@ -12,7 +12,7 @@
 
 module Network.Metrics.Statsd (
     -- * Exported types
-      MetricType
+      MetricType(..)
     , Metric(..)
 
     -- * Socket Handle operations
@@ -36,7 +36,7 @@ data MetricType = Counter | Timer | Gauge deriving (Show)
 data Metric = Metric
     { type'  :: MetricType
     , bucket :: BS.ByteString
-    , value  :: Integer
+    , value  :: BS.ByteString
     , rate   :: Double
     } deriving (Show)
 
@@ -73,7 +73,7 @@ components Metric{..} sampled = case sampled of
     Exact   -> base
     Ignore  -> []
   where
-    base = [bucket, ":", BS.pack $ show value, "|", suffix type']
+    base = [bucket, ":", value, "|", suffix type']
 
 suffix :: MetricType -> BS.ByteString
 suffix typ = case typ of
