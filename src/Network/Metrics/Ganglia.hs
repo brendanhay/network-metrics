@@ -198,10 +198,8 @@ sample :: [a] -> IO a
 sample xs = liftM (xs !!) (randomRIO (0, length xs - 1))
 
 -- | Used to emit a default metric via GHCi
-test :: IO a
-test = do
-    conn <- open "239.2.11.71" "8649"
-    loop conn
+test :: String -> String -> IO a
+test host port = open host port >>= loop
   where
     loop h = do
         r <- randomRIO variance :: IO Int
