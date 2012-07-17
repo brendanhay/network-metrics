@@ -5,6 +5,7 @@ Table of Contents
 -----------------
 
 * [Usage](#usage)
+* [API](#api)
 * [Contribute](#contribute)
 * [Licence](#licence)
 
@@ -36,7 +37,16 @@ main = do
     metric = Metric Counter "name.space" "bucket" "1234" -- Creates graphite key: "name.space.bucket"
 ````
 
+
+<a name="api" />
+
+API
+---
+
+Preliminary API documentation is available [on Hackage](http://hackage.haskell.org/package/network-metrics).
+
 > The API is currently in flux, and conversion between the universal `Metric` `Counter` `Gauge` `Timing` type to the respective sink types is not completed.
+
 
 <a name="contribute" />
 
