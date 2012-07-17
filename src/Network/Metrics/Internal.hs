@@ -16,6 +16,7 @@ module Network.Metrics.Internal (
     , Group
     , Bucket
     , Value
+    , MetricType(..)
     , Metric(..)
     , MetricSink(..)
 
@@ -42,11 +43,15 @@ type Bucket = BS.ByteString
 
 type Value = BS.ByteString
 
-data Metric =
-      Counter Group Bucket Value
-    | Gauge Group Bucket Value
-    | Timer Group Bucket Value
-      deriving (Show)
+-- data Metric =
+--       Counter Group Bucket Value
+--     | Gauge Group Bucket Value
+--     | Timer Group Bucket Value
+--       deriving (Show)
+
+data MetricType = Counter | Gauge | Timer deriving (Show)
+
+data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
 class MetricSink a where
     encode :: Metric -> a -> IO BL.ByteString

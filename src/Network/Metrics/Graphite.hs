@@ -58,9 +58,4 @@ open = I.open Stream
 --
 
 conv :: I.Metric -> Metric
-conv m = case m of
-    (I.Counter g b v) -> fn g b v
-    (I.Gauge g b v)   -> fn g b v
-    (I.Timer g b v)   -> fn g b v
-  where
-    fn g b = Metric (BS.concat [g, ".", b])
+conv (I.Metric _ g b v) = Metric (BS.concat [g, ".", b]) v

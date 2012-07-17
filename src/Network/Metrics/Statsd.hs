@@ -31,10 +31,8 @@ import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 import qualified Network.Metrics.Internal   as I
 
-data MetricType = Counter | Timer | Gauge deriving (Show)
-
 data Metric = Metric
-    { type'  :: MetricType
+    { type'  :: I.MetricType
     , bucket :: BS.ByteString
     , value  :: BS.ByteString
     , rate   :: Double
@@ -49,6 +47,7 @@ instance I.MetricSink Statsd where
       where
         fn = BL.fromChunks . chunks x . sample (rate x)
         x  = conv m
+
 --
 -- API
 --
@@ -62,12 +61,7 @@ open = I.open Datagram
 --
 
 conv :: I.Metric -> Metric
-conv m = case m of
-    (I.Counter g b v) -> fn Counter g b v
-    (I.Gauge g b v)   -> fn Gauge g b v
-    (I.Timer g b v)   -> fn Timer g b v
-  where
-    fn t g b v = Metric t (BS.concat [g, ".", b]) v 1.0
+conv (I.Metric t g b v) = Metric t (BS.concat [g, ".", b]) v 1.0
 
 sample :: Double -> Double -> Sampled
 sample rate rand | rate < 1.0 && rand <= rate = Sampled
@@ -82,8 +76,8 @@ chunks Metric{..} sampled = case sampled of
   where
     base = [bucket, ":", value, "|", suffix type']
 
-suffix :: MetricType -> BS.ByteString
+suffix :: I.MetricType -> BS.ByteString
 suffix typ = case typ of
-    Counter -> "c"
-    Gauge   -> "g"
-    Timer   -> "ms"
+    I.Counter -> "c"
+    I.Gauge   -> "g"
+    I.Timer   -> "ms"

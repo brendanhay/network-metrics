@@ -15,6 +15,8 @@ module Network.Metrics (
       Handle(..)
     , Group
     , Bucket
+    , Value
+    , MetricType(..)
     , Metric(..)
     , MetricSink
 

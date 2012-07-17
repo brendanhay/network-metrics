@@ -16,7 +16,6 @@ module Network.Metrics.Ganglia (
     , MetricType(..)
     , Metric(..)
     , Ganglia(..)
-
     -- * Default constructors
     , defaultMetric
 
@@ -136,12 +135,7 @@ bufferSize :: Integer
 bufferSize = 1500
 
 conv :: I.Metric -> Metric
-conv m = case m of
-    (I.Counter g b v) -> fn g b v
-    (I.Gauge g b v)   -> fn g b v
-    (I.Timer g b v)   -> fn g b v
-  where
-    fn g b v = defaultMetric { name  = b, group = g, value = v }
+conv (I.Metric _ g b v) = defaultMetric { name  = b, group = g, value = v }
 
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> Metric -> Put
