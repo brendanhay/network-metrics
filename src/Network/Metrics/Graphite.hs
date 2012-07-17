@@ -40,11 +40,11 @@ data Metric = Metric
 data Graphite = Graphite
 
 instance I.MetricSink Graphite where
-    encode m e = liftM fn getPOSIXTime
+    encode m _ = liftM fn getPOSIXTime
       where
-        Metric{..} = Metric "bucket" "value" -- conv m
-        fn n = BL.fromChunks [bucket, value, ts n]
-        ts n = BS.pack $ show (truncate n :: Integer)
+        Metric{..} = conv m
+        fn n       = BL.fromChunks [bucket, value, ts n]
+        ts n       = BS.pack $ show (truncate n :: Integer)
 
 --
 -- API
@@ -53,3 +53,15 @@ instance I.MetricSink Graphite where
 -- | Create a new disconnected socket handle for TCP communication
 open :: String -> String -> IO I.Handle
 open = I.open Stream
+
+--
+-- Private
+--
+
+conv :: I.Metric -> Metric
+conv m = case m of
+    (I.Counter g b v) -> fn g b v
+    (I.Gauge g b v)   -> fn g b v
+    (I.Timer g b v)   -> fn g b v
+  where
+    fn g b = Metric (BS.concat [g, ".", b])
