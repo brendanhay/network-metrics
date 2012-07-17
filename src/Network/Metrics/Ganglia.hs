@@ -141,9 +141,12 @@ bufferSize = 1500
 
 -- | Encode a metric into the Ganglia format
 encode :: Metric -> BL.ByteString
-encode (Metric _ g b v) = BL.concat $ map put [putMetaData, putValue]
+encode (Metric t g b v) = BL.concat $ map put [putMetaData, putValue]
   where
-    metric = defaultMetric { name  = b, group = g, value = v }
+    slope' = case t of
+        Counter -> Positive
+        _       -> Both
+    metric = defaultMetric { name  = b, group = g, value = v, slope = slope' }
     put f  = runPut $ f metric
 
 -- | Common headers for the metadata and value
