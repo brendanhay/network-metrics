@@ -13,9 +13,10 @@
 module Network.Metrics.Ganglia (
     -- * Exported types
       Slope(..)
-    , MetricType(..)
-    , Metric(..)
+    , GangliaType(..)
+    , GangliaMetric(..)
     , Ganglia(..)
+
     -- * Default constructors
     , defaultMetric
 
@@ -26,25 +27,33 @@ module Network.Metrics.Ganglia (
     , putMetaData
     , putValue
 
-    -- * Re-exported from internal
-    , I.Handle
-    , I.push
-    , I.close
+    -- -- * Network.Metrics.Internal re-exported types
+    , Group
+    , Bucket
+    , Value
+    , MetricType(..)
+    , Metric(..)
+    , MetricSink(push)
+
+    -- * Network.Metrics.Internal operations
+    , close
     ) where
 
+import Control.Monad            (liftM)
 import Data.Binary.Put
-import Data.Bits          ((.&.))
-import Data.Char          (toLower)
-import Data.Data          (Data, Typeable)
-import Data.Default       (Default, def)
-import Data.Int           (Int32)
-import Data.Word          (Word32)
-import Network.Socket
+import Data.Bits                ((.&.))
+import Data.Char                (toLower)
+import Data.Data                (Data, Typeable)
+import Data.Default             (Default, def)
+import Data.Int                 (Int32)
+import Data.Word                (Word32)
+import Network.Socket           (SocketType(..))
+import Network.Metrics.Internal
 
 import qualified Data.ByteString            as B
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Network.Metrics.Internal   as I
+
 
 -- | Allows gmetad and the PHP webfrontend to efficiently separate
 -- constant data metrics from volatile ones
@@ -52,13 +61,13 @@ data Slope = Zero | Positive | Negative | Both | Unspecified
       deriving (Data, Typeable, Show, Eq, Enum)
 
 -- | Metric types supported by Ganglia
-data MetricType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Float | Double
+data GangliaType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Float | Double
       deriving (Data, Typeable, Eq, Show)
 
 -- | concrete metric type used to emit metadata and value packets
-data Metric = Metric
+data GangliaMetric = GangliaMetric
     { name  :: BS.ByteString
-    , type' :: MetricType
+    , type' :: GangliaType
     , units :: BS.ByteString
     , value :: BS.ByteString
     , host  :: BS.ByteString
@@ -69,23 +78,22 @@ data Metric = Metric
     , dmax  :: Word32
     } deriving (Show)
 
-instance Default (Metric) where
+instance Default GangliaMetric where
     def = defaultMetric
 
-data Ganglia = Ganglia
+data Ganglia = Ganglia Handle
 
-instance I.MetricSink Ganglia where
-    encode m _ = return . BL.concat $ map f [putMetaData, putValue]
-      where
-        f g  = runPut . g $ conv m
+instance MetricSink Ganglia where
+    push m (Ganglia h) = hPush (encode m) h
+    close  (Ganglia h) = hClose h
 
 --
 -- API
 --
 
 -- | A default metric record
-defaultMetric :: Metric
-defaultMetric = Metric
+defaultMetric :: GangliaMetric
+defaultMetric = GangliaMetric
     { name  = ""
     , type' = Int32
     , units = ""
@@ -98,18 +106,17 @@ defaultMetric = Metric
     , dmax  = 0
     }
 
--- | Create a new unconnected socket handle for UDP communication
-open :: String -> String -> IO I.Handle
-open = I.open Datagram
+open :: String -> String -> IO Ganglia
+open host port = liftM Ganglia (hOpen Datagram host port)
 
 -- | Metric metadata
 --
 -- The format for this can be found in either:
 -- * gm_protocol.x in the Ganglia 3.1 sources
 -- * https://github.com/lookfirst/jmxtrans
-putMetaData :: Metric -> Put
-putMetaData metric@Metric{..} = do
-    putHeader 128 metric -- 128 = metadata_msg
+putMetaData :: GangliaMetric -> Put
+putMetaData m@GangliaMetric{..} = do
+    putHeader 128 m -- 128 = metadata_msg
     putType type'
     putString name
     putString units
@@ -119,9 +126,9 @@ putMetaData metric@Metric{..} = do
     putGroup group
 
 -- | Metric value
-putValue :: Metric -> Put
-putValue metric@Metric{..} = do
-    putHeader 133 metric -- 133 = string_msg
+putValue :: GangliaMetric -> Put
+putValue m@GangliaMetric{..} = do
+    putHeader 133 m -- 133 = string_msg
     putString "%s"
     putString value
 
@@ -134,12 +141,15 @@ putValue metric@Metric{..} = do
 bufferSize :: Integer
 bufferSize = 1500
 
-conv :: I.Metric -> Metric
-conv (I.Metric _ g b v) = defaultMetric { name  = b, group = g, value = v }
+encode :: Metric -> BL.ByteString
+encode (Metric _ g b v) = BL.concat $ map put [putMetaData, putValue]
+  where
+    metric = defaultMetric { name  = b, group = g, value = v }
+    put f  = runPut $ f metric
 
 -- | Common headers for the metadata and value
-putHeader :: Int32 -> Metric -> Put
-putHeader code Metric{..} = do
+putHeader :: Int32 -> GangliaMetric -> Put
+putHeader code GangliaMetric{..} = do
     putInt code
     putString host
     putString name
@@ -173,5 +183,5 @@ putString bstr = do
   where
     len = BS.length bstr
 
-putType :: MetricType -> Put
+putType :: GangliaType -> Put
 putType = putString . BS.pack . map toLower . show

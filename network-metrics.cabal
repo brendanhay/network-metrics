@@ -32,8 +32,7 @@ source-repository head
   location: git://github.com/brendanhay/network-metrics.git
 
 library
-  exposed-modules:  Network.Metrics
-                  , Network.Metrics.Ganglia
+  exposed-modules:  Network.Metrics.Ganglia
                   , Network.Metrics.Graphite
                   , Network.Metrics.Statsd
   other-modules:    Network.Metrics.Internal

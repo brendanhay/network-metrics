@@ -21,10 +21,9 @@ module Network.Metrics.Internal (
     , MetricSink(..)
 
     -- * Socket Handle operations
-    , open
-    , close
-    , push
-    , hSend
+    , hOpen
+    , hClose
+    , hPush
     ) where
 
 import Control.Monad                  (unless)
@@ -37,47 +36,44 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 -- | Socket handle
 data Handle = Handle Socket SockAddr deriving (Show)
 
+-- | Metric group
 type Group = BS.ByteString
 
+-- | Metric bucket
 type Bucket = BS.ByteString
 
+-- | Metric value
 type Value = BS.ByteString
 
--- data Metric =
---       Counter Group Bucket Value
---     | Gauge Group Bucket Value
---     | Timer Group Bucket Value
---       deriving (Show)
-
+-- | Metric type
 data MetricType = Counter | Gauge | Timer deriving (Show)
 
+-- | Concrete metric data type
 data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
+-- | Describes a sink resource which is held open for metric emission
 class MetricSink a where
-    encode :: Metric -> a -> IO BL.ByteString
+    push  :: Metric -> a -> IO ()
+    close :: a -> IO ()
 
 --
 -- API
 --
 
 -- | Create a new unconnected socket handle for UDP communication
-open :: SocketType -> String -> String -> IO Handle
-open typ host port = do
+hOpen :: SocketType -> String -> String -> IO Handle
+hOpen typ host port = do
     (addr:_) <- getAddrInfo Nothing (Just host) (Just port)
     sock     <- socket (addrFamily addr) typ defaultProtocol
     return $ Handle sock (addrAddress addr)
 
 -- | Close a socket handle
-close :: Handle -> IO ()
-close (Handle sock _) = sClose sock
-
--- | Push an encoded metric to the specified socket handle
-push :: MetricSink a => Metric -> a -> Handle -> IO ()
-push m e h = flip hSend h =<< encode m e
+hClose :: Handle -> IO ()
+hClose (Handle sock _) = sClose sock
 
 -- | Direct access for writing a bytestring to the socket handle
-hSend :: BL.ByteString -> Handle -> IO ()
-hSend bstr (Handle sock addr) | BL.null bstr = return ()
+hPush :: BL.ByteString -> Handle -> IO ()
+hPush bstr (Handle sock addr) | BL.null bstr = return ()
                               | otherwise    = do
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- send sock bstr

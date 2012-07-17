@@ -11,28 +11,31 @@
 --
 
 module Network.Metrics.Statsd (
-    -- * Exported types
-      Statsd(..)
-
     -- * Socket Handle operations
-    , open
+      open
 
-    -- * Re-exported from internal
-    , I.Handle
-    , I.push
-    , I.close
+    -- * Network.Metrics.Internal re-exported types
+    , Group
+    , Bucket
+    , Value
+    , MetricType(..)
+    , Metric(..)
+    , MetricSink(push)
+
+    -- * Network.Metrics.Internal operations
+    , close
     ) where
 
 import Control.Monad  (liftM)
-import Network.Socket
+import Network.Socket (SocketType(..))
 import System.Random  (randomRIO)
+import Network.Metrics.Internal
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Network.Metrics.Internal   as I
 
-data Metric = Metric
-    { type'  :: I.MetricType
+data StatsdMetric = StatsdMetric
+    { type'  :: MetricType
     , bucket :: BS.ByteString
     , value  :: BS.ByteString
     , rate   :: Double
@@ -40,44 +43,45 @@ data Metric = Metric
 
 data Sampled = Sampled | Exact | Ignore
 
-data Statsd = Statsd
+data Statsd = Statsd Handle
 
-instance I.MetricSink Statsd where
-    encode m _ = liftM fn (randomRIO (0.0, 1.0))
-      where
-        fn = BL.fromChunks . chunks x . sample (rate x)
-        x  = conv m
+instance MetricSink Statsd where
+    push m (Statsd h) = encode m >>= flip hPush h
+    close  (Statsd h) = hClose h
 
 --
 -- API
 --
 
 -- | Create a new disconnected socket handle for UDP communication
-open :: String -> String -> IO I.Handle
-open = I.open Datagram
+open :: String -> String -> IO Statsd
+open host port = liftM Statsd (hOpen Datagram host port)
 
 --
 -- Private
 --
 
-conv :: I.Metric -> Metric
-conv (I.Metric t g b v) = Metric t (BS.concat [g, ".", b]) v 1.0
+encode :: Metric -> IO BL.ByteString
+encode (Metric t g b v) = liftM bstr (randomRIO (0.0, 1.0))
+  where
+    metric = StatsdMetric t (BS.concat [g, ".", b]) v 1.0
+    bstr   = BL.fromChunks . chunks metric . sample (rate metric)
 
 sample :: Double -> Double -> Sampled
 sample rate rand | rate < 1.0 && rand <= rate = Sampled
                  | rate == 1.0                = Exact
                  | otherwise                  = Ignore
 
-chunks :: Metric -> Sampled -> [BS.ByteString]
-chunks Metric{..} sampled = case sampled of
+chunks :: StatsdMetric -> Sampled -> [BS.ByteString]
+chunks StatsdMetric{..} sampled = case sampled of
     Sampled -> base ++ ["@", BS.pack $ show rate]
     Exact   -> base
     Ignore  -> []
   where
     base = [bucket, ":", value, "|", suffix type']
 
-suffix :: I.MetricType -> BS.ByteString
+suffix :: MetricType -> BS.ByteString
 suffix typ = case typ of
-    I.Counter -> "c"
-    I.Gauge   -> "g"
-    I.Timer   -> "ms"
+    Counter -> "c"
+    Gauge   -> "g"
+    Timer   -> "ms"

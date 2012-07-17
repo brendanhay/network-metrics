@@ -11,51 +11,50 @@
 --
 
 module Network.Metrics.Graphite (
-    -- * Exported types
-      Graphite(..)
-
     -- * Socket Handle operations
-    , open
+      open
 
-    -- * Re-exported from internal
-    , I.Handle
-    , I.push
-    , I.close
+    -- * Network.Metrics.Internal re-exported types
+    , Group
+    , Bucket
+    , Value
+    , MetricType(..)
+    , Metric(..)
+    , MetricSink(push)
+
+    -- * Network.Metrics.Internal operations
+    , close
     ) where
 
-import Control.Monad         (liftM)
+import Control.Monad            (liftM)
 import Network.Socket
 import Data.Time.Clock.POSIX
+import Network.Metrics.Internal
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-import qualified Network.Metrics.Internal   as I
 
-data Metric = Metric
-    { bucket :: BS.ByteString
-    , value  :: BS.ByteString
-    } deriving (Show)
+data Graphite = Graphite Handle
 
-data Graphite = Graphite
-
-instance I.MetricSink Graphite where
-    encode m _ = liftM fn getPOSIXTime
-      where
-        Metric{..} = conv m
-        fn n       = BL.fromChunks [bucket, value, ts n]
-        ts n       = BS.pack $ show (truncate n :: Integer)
-
+instance MetricSink Graphite where
+    push m (Graphite h) = encode m >>= flip hPush h
+    close  (Graphite h) = hClose h
 --
 -- API
 --
 
 -- | Create a new disconnected socket handle for TCP communication
-open :: String -> String -> IO I.Handle
-open = I.open Stream
+open :: String -> String -> IO Graphite
+open host port = liftM Graphite (hOpen Stream host port)
 
 --
 -- Private
 --
 
-conv :: I.Metric -> Metric
-conv (I.Metric _ g b v) = Metric (BS.concat [g, ".", b]) v
+encode :: Metric -> IO BL.ByteString
+encode (Metric _ g b v) = liftM bstr getPOSIXTime
+  where
+    bucket      = BS.concat [g, ".", b]
+    timestamp n = BS.pack $ show (truncate n :: Integer)
+    bstr n      = BL.fromChunks [bucket, v, timestamp n]
+
