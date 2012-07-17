@@ -43,7 +43,7 @@ data StatsdMetric = StatsdMetric
 
 data Sampled = Sampled | Exact | Ignore
 
-data Statsd = Statsd Handle
+data Statsd = Statsd Handle deriving (Show)
 
 instance MetricSink Statsd where
     push m (Statsd h) = encode m >>= flip hPush h

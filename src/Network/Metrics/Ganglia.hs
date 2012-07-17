@@ -54,7 +54,6 @@ import qualified Data.ByteString            as B
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
-
 -- | Allows gmetad and the PHP webfrontend to efficiently separate
 -- constant data metrics from volatile ones
 data Slope = Zero | Positive | Negative | Both | Unspecified
@@ -81,7 +80,7 @@ data GangliaMetric = GangliaMetric
 instance Default GangliaMetric where
     def = defaultMetric
 
-data Ganglia = Ganglia Handle
+data Ganglia = Ganglia Handle deriving (Show)
 
 instance MetricSink Ganglia where
     push m (Ganglia h) = hPush (encode m) h

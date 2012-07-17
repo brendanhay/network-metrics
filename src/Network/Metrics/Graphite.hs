@@ -34,7 +34,7 @@ import Network.Metrics.Internal
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
-data Graphite = Graphite Handle
+data Graphite = Graphite Handle deriving (Show)
 
 instance MetricSink Graphite where
     push m (Graphite h) = encode m >>= flip hPush h
