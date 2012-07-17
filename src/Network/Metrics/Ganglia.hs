@@ -11,29 +11,29 @@
 --
 
 module Network.Metrics.Ganglia (
-    -- * Exported types
+    -- * Exported Types
       Slope(..)
     , GangliaType(..)
     , GangliaMetric(..)
     , Ganglia(..)
 
-    -- * Default constructors
+    -- * Defaults
     , defaultMetric
 
-    -- * Create a ganglia metric sink
-    , open
-
-    -- * Binary encoding
+    -- * Binary Encoding
     , putMetaData
     , putValue
 
-    -- -- * Network.Metrics.Internal re-exported types
+    -- * Sink Functions
+    , open
+    , MetricSink(push, close)
+
+    -- * Re-exports
     , Group
     , Bucket
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(push, close)
     ) where
 
 import Control.Monad            (liftM)

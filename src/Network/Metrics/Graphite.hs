@@ -11,16 +11,16 @@
 --
 
 module Network.Metrics.Graphite (
-    -- * Create a graphite metric sink
-      open
+    -- * Sink Functions
+    , open
+    , MetricSink(push, close)
 
-    -- * Network.Metrics.Internal re-exported types
+    -- * Re-exports
     , Group
     , Bucket
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(push, close)
     ) where
 
 import Control.Monad            (liftM)

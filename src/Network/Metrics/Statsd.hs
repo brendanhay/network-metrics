@@ -11,16 +11,16 @@
 --
 
 module Network.Metrics.Statsd (
-    -- * Create a statsd metric sink
+    -- * Sink Functions
       open
+    , MetricSink(push, close)
 
-    -- * Network.Metrics.Internal re-exported types
+    -- * Re-exports
     , Group
     , Bucket
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(push, close)
     ) where
 
 import Control.Monad  (liftM)
