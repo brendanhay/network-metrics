@@ -33,7 +33,6 @@ module Network.Metrics.Ganglia (
     , I.close
     ) where
 
-import Data.Binary        (encode)
 import Data.Binary.Put
 import Data.Bits          ((.&.))
 import Data.Char          (toLower)

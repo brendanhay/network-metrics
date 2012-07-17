@@ -68,7 +68,7 @@ close (Handle sock _) = sClose sock
 
 -- | Push an encoded metric to the specified socket handle
 push :: MetricSink a => Metric -> a -> Handle -> IO ()
-push m e h = (flip hSend) h =<< encode m e
+push m e h = flip hSend h =<< encode m e
 
 -- | Direct access for writing a bytestring to the socket handle
 hSend :: BL.ByteString -> Handle -> IO ()
