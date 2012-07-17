@@ -15,6 +15,7 @@ module Network.Metrics.Internal (
       Handle(..)
     , Group
     , Bucket
+    , Value
     , Metric(..)
     , MetricSink(..)
 
@@ -39,14 +40,16 @@ type Group = BS.ByteString
 
 type Bucket = BS.ByteString
 
-data Metric a =
-      Counter Group Bucket a
-    | Gauge Group Bucket a
-    | Timer Group Bucket a
+type Value = BS.ByteString
+
+data Metric =
+      Counter Group Bucket Value
+    | Gauge Group Bucket Value
+    | Timer Group Bucket Value
       deriving (Show)
 
 class MetricSink a where
-    encode :: Metric b -> a -> IO BL.ByteString
+    encode :: Metric -> a -> IO BL.ByteString
 
 --
 -- API
@@ -64,7 +67,7 @@ close :: Handle -> IO ()
 close (Handle sock _) = sClose sock
 
 -- | Push an encoded metric to the specified socket handle
-push :: MetricSink a => Metric b -> a -> Handle -> IO ()
+push :: MetricSink a => Metric -> a -> Handle -> IO ()
 push m e h = (flip hSend) h =<< encode m e
 
 -- | Direct access for writing a bytestring to the socket handle

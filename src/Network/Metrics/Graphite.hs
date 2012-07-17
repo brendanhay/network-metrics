@@ -24,6 +24,7 @@ module Network.Metrics.Graphite (
     , I.close
     ) where
 
+import Control.Monad         (liftM)
 import Network.Socket
 import Data.Time.Clock.POSIX
 
@@ -39,7 +40,7 @@ data Metric = Metric
 data Graphite = Graphite
 
 instance I.MetricSink Graphite where
-    encode m e = getPOSIXTime >>= return . fn
+    encode m e = liftM fn getPOSIXTime
       where
         Metric{..} = Metric "bucket" "value" -- conv m
         fn n = BL.fromChunks [bucket, value, ts n]

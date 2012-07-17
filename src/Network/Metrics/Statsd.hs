@@ -25,8 +25,9 @@ module Network.Metrics.Statsd (
     , I.close
     ) where
 
+import Control.Monad  (liftM)
 import Network.Socket
-import System.Random (randomRIO)
+import System.Random  (randomRIO)
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
@@ -46,11 +47,10 @@ data Sampled = Sampled | Exact | Ignore
 data Statsd = Statsd
 
 instance I.MetricSink Statsd where
-    encode m e = randomRIO (0.0, 1.0) >>= return . fn
+    encode m _ = liftM fn (randomRIO (0.0, 1.0))
       where
-        fn   = BL.fromChunks . chunks conv . sample 1.0
-        conv = Metric Counter "bucket" "value" 1.0
-
+        fn = BL.fromChunks . chunks x . sample (rate x)
+        x  = conv m
 --
 -- API
 --
@@ -58,6 +58,18 @@ instance I.MetricSink Statsd where
 -- | Create a new disconnected socket handle for UDP communication
 open :: String -> String -> IO I.Handle
 open = I.open Datagram
+
+--
+-- Private
+--
+
+conv :: I.Metric -> Metric
+conv m = case m of
+    (I.Counter g b v) -> fn Counter g b v
+    (I.Gauge g b v)   -> fn Gauge g b v
+    (I.Timer g b v)   -> fn Timer g b v
+  where
+    fn t g b v = Metric t (BS.concat [g, ".", b]) v 1.0
 
 --
 -- Sampling

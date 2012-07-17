@@ -33,6 +33,7 @@ module Network.Metrics.Ganglia (
     , I.close
     ) where
 
+import Data.Binary        (encode)
 import Data.Binary.Put
 import Data.Bits          ((.&.))
 import Data.Char          (toLower)
@@ -58,29 +59,27 @@ data MetricType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Floa
 
 -- | concrete metric type used to emit metadata and value packets
 data Metric = Metric
-    { name  :: BS.ByteString -- use
-    , type' :: MetricType    -- use a default int32 type to support signed values
-    , units :: BS.ByteString -- think of a simple value rep for counters, timers, and gauges
-    , value :: BS.ByteString -- use
-    , host  :: BS.ByteString -- leave blank
-    , spoof :: BS.ByteString -- leave blank
-    , group :: BS.ByteString -- this can be in the global type
-    , slope :: Slope  -- just leave as default, both
-    , tmax  :: Word32 -- leave as default, 60
-    , dmax  :: Word32 -- the lifetime, for guages this is 0
-                      -- what about for counters, timers?
+    { name  :: BS.ByteString
+    , type' :: MetricType
+    , units :: BS.ByteString
+    , value :: BS.ByteString
+    , host  :: BS.ByteString
+    , spoof :: BS.ByteString
+    , group :: BS.ByteString
+    , slope :: Slope
+    , tmax  :: Word32
+    , dmax  :: Word32
     } deriving (Show)
 
-instance Default Metric where
+instance Default (Metric) where
     def = defaultMetric
 
 data Ganglia = Ganglia
 
 instance I.MetricSink Ganglia where
-    encode _ _ = return . BL.concat $ map f [putMetaData, putValue]
+    encode m _ = return . BL.concat $ map f [putMetaData, putValue]
       where
-        f g  = runPut $ g conv
-        conv = defaultMetric -- conv m
+        f g  = runPut . g $ conv m
 
 --
 -- API
@@ -89,10 +88,10 @@ instance I.MetricSink Ganglia where
 -- | A default metric record
 defaultMetric :: Metric
 defaultMetric = Metric
-    { name  = "magical_metric"
-    , type' = UInt16
+    { name  = ""
+    , type' = Int32
     , units = ""
-    , value = "0"
+    , value = ""
     , host  = ""
     , spoof = ""
     , group = ""
@@ -134,8 +133,16 @@ putValue metric@Metric{..} = do
 
 -- TODO: enforce max buffer size length checks.
 -- Magic number is per libgmond.c
--- bufferSize :: Integer
--- bufferSize = 1500
+bufferSize :: Integer
+bufferSize = 1500
+
+conv :: I.Metric -> Metric
+conv m = case m of
+    (I.Counter g b v) -> fn g b v
+    (I.Gauge g b v)   -> fn g b v
+    (I.Timer g b v)   -> fn g b v
+  where
+    fn g b v = defaultMetric { name  = b, group = g, value = v }
 
 --
 -- Binary Encoding
