@@ -11,7 +11,7 @@
 --
 
 module Network.Metrics.Graphite (
-    -- * Socket Handle operations
+    -- * Create a graphite metric sink
       open
 
     -- * Network.Metrics.Internal re-exported types
@@ -20,10 +20,7 @@ module Network.Metrics.Graphite (
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(push)
-
-    -- * Network.Metrics.Internal operations
-    , close
+    , MetricSink(push, close)
     ) where
 
 import Control.Monad            (liftM)

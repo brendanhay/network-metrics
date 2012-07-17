@@ -11,7 +11,7 @@
 --
 
 module Network.Metrics.Statsd (
-    -- * Socket Handle operations
+    -- * Create a statsd metric sink
       open
 
     -- * Network.Metrics.Internal re-exported types
@@ -20,10 +20,7 @@ module Network.Metrics.Statsd (
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(push)
-
-    -- * Network.Metrics.Internal operations
-    , close
+    , MetricSink(push, close)
     ) where
 
 import Control.Monad  (liftM)

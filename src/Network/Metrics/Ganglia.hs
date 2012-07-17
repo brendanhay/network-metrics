@@ -20,7 +20,7 @@ module Network.Metrics.Ganglia (
     -- * Default constructors
     , defaultMetric
 
-    -- * Socket Handle operations
+    -- * Create a ganglia metric sink
     , open
 
     -- * Binary encoding
@@ -33,10 +33,7 @@ module Network.Metrics.Ganglia (
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(push)
-
-    -- * Network.Metrics.Internal operations
-    , close
+    , MetricSink(push, close)
     ) where
 
 import Control.Monad            (liftM)
