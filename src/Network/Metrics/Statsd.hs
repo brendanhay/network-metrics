@@ -14,13 +14,14 @@ module Network.Metrics.Statsd (
     -- * Exported types
       MetricType(..)
     , Metric(..)
+    , Statsd(..)
 
     -- * Socket Handle operations
     , open
-    , emit
 
     -- * Re-exported from internal
     , I.Handle
+    , I.push
     , I.close
     ) where
 
@@ -42,6 +43,14 @@ data Metric = Metric
 
 data Sampled = Sampled | Exact | Ignore
 
+data Statsd = Statsd
+
+instance I.MetricSink Statsd where
+    encode m e = randomRIO (0.0, 1.0) >>= return . fn
+      where
+        fn   = BL.fromChunks . chunks conv . sample 1.0
+        conv = Metric Counter "bucket" "value" 1.0
+
 --
 -- API
 --
@@ -49,14 +58,6 @@ data Sampled = Sampled | Exact | Ignore
 -- | Create a new disconnected socket handle for UDP communication
 open :: String -> String -> IO I.Handle
 open = I.open Datagram
-
--- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> I.Handle -> IO ()
-emit metric handle = do
-    rand <- randomRIO (0.0, 1.0)
-    I.emit (encoded rand) handle
-  where
-    encoded = BL.fromChunks . chunks metric . sample (rate metric)
 
 --
 -- Sampling

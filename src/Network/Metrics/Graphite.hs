@@ -13,13 +13,14 @@
 module Network.Metrics.Graphite (
     -- * Exported types
       Metric(..)
+    , Graphite(..)
 
     -- * Socket Handle operations
     , open
-    , emit
 
     -- * Re-exported from internal
     , I.Handle
+    , I.push
     , I.close
     ) where
 
@@ -35,6 +36,15 @@ data Metric = Metric
     , value  :: BS.ByteString
     } deriving (Show)
 
+data Graphite = Graphite
+
+instance I.MetricSink Graphite where
+    encode m e = getPOSIXTime >>= return . fn
+      where
+        Metric{..} = Metric "bucket" "value" -- conv m
+        fn n = BL.fromChunks [bucket, value, ts n]
+        ts n = BS.pack $ show (truncate n :: Integer)
+
 --
 -- API
 --
@@ -42,12 +52,3 @@ data Metric = Metric
 -- | Create a new disconnected socket handle for TCP communication
 open :: String -> String -> IO I.Handle
 open = I.open Stream
-
--- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> I.Handle -> IO ()
-emit Metric{..} handle = do
-    time <- getPOSIXTime
-    I.emit (encoded time) handle
-  where
-    encoded n   = BL.fromChunks [bucket, value, timestamp n]
-    timestamp n = BS.pack $ show (truncate n :: Integer)

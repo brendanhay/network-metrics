@@ -13,21 +13,40 @@
 module Network.Metrics.Internal (
     -- * Exported types
       Handle(..)
+    , Group
+    , Bucket
+    , Metric(..)
+    , MetricSink(..)
 
     -- * Socket Handle operations
     , open
     , close
-    , emit
+    , push
+    , hSend
     ) where
 
 import Control.Monad                  (unless)
 import Network.Socket                 hiding (send)
 import Network.Socket.ByteString.Lazy (send)
 
+import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 -- | Socket handle
 data Handle = Handle Socket SockAddr deriving (Show)
+
+type Group = BS.ByteString
+
+type Bucket = BS.ByteString
+
+data Metric a =
+      Counter Group Bucket a
+    | Gauge Group Bucket a
+    | Timer Group Bucket a
+      deriving (Show)
+
+class MetricSink a where
+    encode :: Metric b -> a -> IO BL.ByteString
 
 --
 -- API
@@ -45,9 +64,13 @@ close :: Handle -> IO ()
 close (Handle sock _) = sClose sock
 
 -- | Push an encoded metric to the specified socket handle
-emit :: BL.ByteString -> Handle -> IO ()
-emit bstr (Handle sock addr) | BL.null bstr = return ()
-                             | otherwise    = do
+push :: MetricSink a => Metric b -> a -> Handle -> IO ()
+push m e h = (flip hSend) h =<< encode m e
+
+-- | Direct access for writing a bytestring to the socket handle
+hSend :: BL.ByteString -> Handle -> IO ()
+hSend bstr (Handle sock addr) | BL.null bstr = return ()
+                              | otherwise    = do
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- send sock bstr
     return ()

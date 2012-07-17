@@ -11,8 +11,24 @@
 --
 
 module Network.Metrics (
-    -- * Re-exported types
+    -- * Network.Metrics.Internal re-exported types
       Handle(..)
+    , Group
+    , Bucket
+    , Metric(..)
+    , MetricSink
+
+    -- * Network.Metrics.* re-exported types
+    , Ganglia
+    , Graphite
+    , Statsd
+
+    -- * Socket Handle operations
+    , close
+    , push
     ) where
 
 import Network.Metrics.Internal
+import Network.Metrics.Ganglia  (Ganglia)
+import Network.Metrics.Graphite (Graphite)
+import Network.Metrics.Statsd   (Statsd)

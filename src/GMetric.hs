@@ -14,13 +14,15 @@ module Main (
       main
     ) where
 
-import Control.Monad          (when)
-import Data.ByteString.Char8  (pack)
+import Control.Monad         (when)
+import Data.Binary.Put       (runPut)
+import Data.ByteString.Char8 (pack)
 import System.Console.CmdArgs
-import System.Environment     (getArgs, withArgs)
-import System.Exit            (ExitCode(..), exitWith)
+import System.Environment    (getArgs, withArgs)
+import System.Exit           (ExitCode(..), exitWith)
 
-import qualified Network.Metrics.Ganglia as G
+import qualified Network.Metrics.Internal as I
+import qualified Network.Metrics.Ganglia  as G
 
 data Options = Options
     { optHost  :: String
@@ -49,11 +51,13 @@ main = parse >>= emit
 
 emit :: Options -> IO ()
 emit Options{..} = do
-    handle <- G.open optHost optPort
-    G.emit metric handle
-    G.close handle
+    hd <- G.open optHost optPort
+    _  <- push G.putMetaData hd
+    _  <- push G.putValue hd
+    G.close hd
   where
-    metric = G.Metric
+    push fn = I.hSend . runPut $ fn metric
+    metric  = G.Metric
         (pack optName)
         optType
         (pack optUnits)

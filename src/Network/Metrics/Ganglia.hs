@@ -15,24 +15,24 @@ module Network.Metrics.Ganglia (
       Slope(..)
     , MetricType(..)
     , Metric(..)
+    , Ganglia(..)
 
     -- * Default constructors
     , defaultMetric
 
     -- * Socket Handle operations
     , open
-    , emit
 
-    -- * Development helpers
-    , test
+    -- * Binary encoding
+    , putMetaData
+    , putValue
 
     -- * Re-exported from internal
     , I.Handle
+    , I.push
     , I.close
     ) where
 
-import Control.Concurrent (threadDelay)
-import Control.Monad      (unless, liftM)
 import Data.Binary.Put
 import Data.Bits          ((.&.))
 import Data.Char          (toLower)
@@ -41,11 +41,11 @@ import Data.Default       (Default, def)
 import Data.Int           (Int32)
 import Data.Word          (Word32)
 import Network.Socket
-import System.Random      (randomRIO)
 
-import qualified Data.ByteString          as B
-import qualified Data.ByteString.Char8    as BS
-import qualified Network.Metrics.Internal as I
+import qualified Data.ByteString            as B
+import qualified Data.ByteString.Char8      as BS
+import qualified Data.ByteString.Lazy.Char8 as BL
+import qualified Network.Metrics.Internal   as I
 
 -- | Allows gmetad and the PHP webfrontend to efficiently separate
 -- constant data metrics from volatile ones
@@ -56,22 +56,31 @@ data Slope = Zero | Positive | Negative | Both | Unspecified
 data MetricType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Float | Double
       deriving (Data, Typeable, Eq, Show)
 
--- | Concrete metric type used to emit metadata and value packets
+-- | concrete metric type used to emit metadata and value packets
 data Metric = Metric
-    { name  :: BS.ByteString
-    , type' :: MetricType
-    , units :: BS.ByteString
-    , value :: BS.ByteString
-    , host  :: BS.ByteString
-    , spoof :: BS.ByteString
-    , group :: BS.ByteString
-    , slope :: Slope
-    , tmax  :: Word32
-    , dmax  :: Word32
+    { name  :: BS.ByteString -- use
+    , type' :: MetricType    -- use a default int32 type to support signed values
+    , units :: BS.ByteString -- think of a simple value rep for counters, timers, and gauges
+    , value :: BS.ByteString -- use
+    , host  :: BS.ByteString -- leave blank
+    , spoof :: BS.ByteString -- leave blank
+    , group :: BS.ByteString -- this can be in the global type
+    , slope :: Slope  -- just leave as default, both
+    , tmax  :: Word32 -- leave as default, 60
+    , dmax  :: Word32 -- the lifetime, for guages this is 0
+                      -- what about for counters, timers?
     } deriving (Show)
 
 instance Default Metric where
     def = defaultMetric
+
+data Ganglia = Ganglia
+
+instance I.MetricSink Ganglia where
+    encode _ _ = return . BL.concat $ map f [putMetaData, putValue]
+      where
+        f g  = runPut $ g conv
+        conv = defaultMetric -- conv m
 
 --
 -- API
@@ -96,29 +105,6 @@ defaultMetric = Metric
 open :: String -> String -> IO I.Handle
 open = I.open Datagram
 
--- | Emit a metric's metadata and value on the specified socket handle
-emit :: Metric -> I.Handle -> IO ()
-emit metric handle@(I.Handle sock addr) = do
-    sIsConnected sock >>= \b -> unless b $ connect sock addr
-    _ <- push putMetaData handle
-    _ <- push putMetric handle
-    return ()
-  where
-    push fn = I.emit . runPut $ fn metric
-
---
--- Private
---
-
--- TODO: enforce max buffer size length checks.
--- Magic number is per libgmond.c
-bufferSize :: Integer
-bufferSize = 1500
-
---
--- Binary Encoding
---
-
 -- | Metric metadata
 --
 -- The format for this can be found in either:
@@ -136,11 +122,24 @@ putMetaData metric@Metric{..} = do
     putGroup group
 
 -- | Metric value
-putMetric :: Metric -> Put
-putMetric metric@Metric{..} = do
+putValue :: Metric -> Put
+putValue metric@Metric{..} = do
     putHeader 133 metric -- 133 = string_msg
     putString "%s"
     putString value
+
+--
+-- Private
+--
+
+-- TODO: enforce max buffer size length checks.
+-- Magic number is per libgmond.c
+-- bufferSize :: Integer
+-- bufferSize = 1500
+
+--
+-- Binary Encoding
+--
 
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> Metric -> Put
@@ -180,30 +179,3 @@ putString bstr = do
 
 putType :: MetricType -> Put
 putType = putString . BS.pack . map toLower . show
-
---
--- Development
---
-
--- | Exactly one second!
-oneSecond :: Int
-oneSecond = 1000000
-
--- | The min, max variance of test metrics
-variance :: (Int, Int)
-variance = (0, 1000)
-
--- | Sample a random element from a list
-sample :: [a] -> IO a
-sample xs = liftM (xs !!) (randomRIO (0, length xs - 1))
-
--- | Used to emit a default metric via GHCi
-test :: String -> String -> IO a
-test host port = open host port >>= loop
-  where
-    loop h = do
-        r <- randomRIO variance :: IO Int
-        n <- sample ["magic", "candy", "unicorns"]
-        emit defaultMetric { name = n, value = BS.pack $ show r } h
-        threadDelay oneSecond
-        loop h
