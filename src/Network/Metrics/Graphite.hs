@@ -12,7 +12,7 @@
 
 module Network.Metrics.Graphite (
     -- * Sink Functions
-    , open
+      open
     , MetricSink(push, close)
 
     -- * Re-exports
