@@ -11,7 +11,7 @@
 --
 
 module Network.Metrics.Internal (
-    -- * Exported types
+    -- * Exported Types
       Handle(..)
     , Group
     , Bucket
@@ -20,7 +20,7 @@ module Network.Metrics.Internal (
     , Metric(..)
     , MetricSink(..)
 
-    -- * Socket Handle operations
+    -- * Socket Handle Functions
     , hOpen
     , hClose
     , hPush
@@ -51,16 +51,18 @@ data MetricType = Counter | Gauge | Timer deriving (Show)
 -- | Concrete metric data type
 data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
--- | Describes a sink resource which is held open for metric emission
+-- | Sink resource to write metrics to
 class MetricSink a where
+    -- ^ Write a metric to the sink.
     push  :: Metric -> a -> IO ()
+    -- ^ Close the sink, any subsequent writes will throw an error.
     close :: a -> IO ()
 
 --
 -- API
 --
 
--- | Create a new unconnected socket handle for UDP communication
+-- | Create a new socket handle (in a disconnected state) for UDP communication
 hOpen :: SocketType -> String -> String -> IO Handle
 hOpen typ host port = do
     (addr:_) <- getAddrInfo Nothing (Just host) (Just port)
@@ -71,7 +73,7 @@ hOpen typ host port = do
 hClose :: Handle -> IO ()
 hClose (Handle sock _) = sClose sock
 
--- | Direct access for writing a bytestring to the socket handle
+-- | Direct access for writing a bytestring to a socket handle
 hPush :: BL.ByteString -> Handle -> IO ()
 hPush bstr (Handle sock addr) | BL.null bstr = return ()
                               | otherwise    = do

@@ -31,6 +31,7 @@ import Network.Metrics.Internal
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
+-- | An internal record used to describe a Statsd metric
 data StatsdMetric = StatsdMetric
     { type'  :: MetricType
     , bucket :: BS.ByteString
@@ -38,8 +39,10 @@ data StatsdMetric = StatsdMetric
     , rate   :: Double
     } deriving (Show)
 
+-- | The sample status of a metric
 data Sampled = Sampled | Exact | Ignore
 
+-- | A handle to a Statsd sink
 data Statsd = Statsd Handle deriving (Show)
 
 instance MetricSink Statsd where
@@ -50,7 +53,7 @@ instance MetricSink Statsd where
 -- API
 --
 
--- | Create a new disconnected socket handle for UDP communication
+-- | Open a new Statsd sink
 open :: String -> String -> IO Statsd
 open host port = liftM Statsd (hOpen Datagram host port)
 
@@ -58,6 +61,7 @@ open host port = liftM Statsd (hOpen Datagram host port)
 -- Private
 --
 
+-- | Encode a metric into the Statsd format
 encode :: Metric -> IO BL.ByteString
 encode (Metric t g b v) = liftM bstr (randomRIO (0.0, 1.0))
   where

@@ -31,6 +31,7 @@ import Network.Metrics.Internal
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
+-- | A handle to a Graphite sink
 data Graphite = Graphite Handle deriving (Show)
 
 instance MetricSink Graphite where
@@ -40,7 +41,7 @@ instance MetricSink Graphite where
 -- API
 --
 
--- | Create a new disconnected socket handle for TCP communication
+-- | Open a new Graphite sink
 open :: String -> String -> IO Graphite
 open host port = liftM Graphite (hOpen Stream host port)
 
@@ -48,6 +49,7 @@ open host port = liftM Graphite (hOpen Stream host port)
 -- Private
 --
 
+-- | Encode a metric into the Graphite format
 encode :: Metric -> IO BL.ByteString
 encode (Metric _ g b v) = liftM bstr getPOSIXTime
   where

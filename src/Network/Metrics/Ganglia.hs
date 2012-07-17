@@ -77,6 +77,7 @@ data GangliaMetric = GangliaMetric
 instance Default GangliaMetric where
     def = defaultMetric
 
+-- | A handle to a Ganglia sink
 data Ganglia = Ganglia Handle deriving (Show)
 
 instance MetricSink Ganglia where
@@ -87,7 +88,7 @@ instance MetricSink Ganglia where
 -- API
 --
 
--- | A default metric record
+-- | Sensible defaults for a GangliaMetric
 defaultMetric :: GangliaMetric
 defaultMetric = GangliaMetric
     { name  = ""
@@ -102,10 +103,11 @@ defaultMetric = GangliaMetric
     , dmax  = 0
     }
 
+-- | Open a new Ganglia sink
 open :: String -> String -> IO Ganglia
 open host port = liftM Ganglia (hOpen Datagram host port)
 
--- | Metric metadata
+-- | Encode a GangliaMetric's metadata into a Binary.Put monad
 --
 -- The format for this can be found in either:
 -- * gm_protocol.x in the Ganglia 3.1 sources
@@ -121,7 +123,7 @@ putMetaData m@GangliaMetric{..} = do
     putUInt dmax
     putGroup group
 
--- | Metric value
+-- | Encode a GangliaMetric's value into a Binary.Put monad
 putValue :: GangliaMetric -> Put
 putValue m@GangliaMetric{..} = do
     putHeader 133 m -- 133 = string_msg
@@ -137,6 +139,7 @@ putValue m@GangliaMetric{..} = do
 bufferSize :: Integer
 bufferSize = 1500
 
+-- | Encode a metric into the Ganglia format
 encode :: Metric -> BL.ByteString
 encode (Metric _ g b v) = BL.concat $ map put [putMetaData, putValue]
   where
