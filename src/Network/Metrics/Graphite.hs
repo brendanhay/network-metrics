@@ -12,8 +12,7 @@
 
 module Network.Metrics.Graphite (
     -- * Exported types
-      Metric(..)
-    , Graphite(..)
+      Graphite(..)
 
     -- * Socket Handle operations
     , open

@@ -143,10 +143,6 @@ conv m = case m of
   where
     fn g b v = defaultMetric { name  = b, group = g, value = v }
 
---
--- Binary Encoding
---
-
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> Metric -> Put
 putHeader code Metric{..} = do

@@ -12,9 +12,7 @@
 
 module Network.Metrics.Statsd (
     -- * Exported types
-      MetricType(..)
-    , Metric(..)
-    , Statsd(..)
+      Statsd(..)
 
     -- * Socket Handle operations
     , open
@@ -70,10 +68,6 @@ conv m = case m of
     (I.Timer g b v)   -> fn Timer g b v
   where
     fn t g b v = Metric t (BS.concat [g, ".", b]) v 1.0
-
---
--- Sampling
---
 
 sample :: Double -> Double -> Sampled
 sample rate rand | rate < 1.0 && rand <= rate = Sampled
