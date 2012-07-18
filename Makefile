@@ -24,5 +24,5 @@ doc:
 	$(CABAL) haddock
 
 package: clean install doc
-	$(CABAL) sdist
+	$(CABAL) check && $(CABAL) sdist
 
