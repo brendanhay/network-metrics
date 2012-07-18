@@ -37,6 +37,7 @@ data Graphite = Graphite Handle deriving (Show)
 instance MetricSink Graphite where
     push m (Graphite h) = encode m >>= flip hPush h
     close  (Graphite h) = hClose h
+
 --
 -- API
 --
