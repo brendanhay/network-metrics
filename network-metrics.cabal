@@ -18,12 +18,8 @@ description:
     .
     Supported services are Ganglia, Graphite, and statsd.
     .
-    These modules are intended to be imported qualified, to avoid name
-    clashes with other modules, e.g.
-    .
-    > import qualified Network.Metrics.Ganglia  as A
-    > import qualified Network.Metrics.Graphite as B
-    > import qualified Network.Metrics.Statsd   as C
+    Please see <http://github.com/brendanhay/network-metrics/blob/master/README.md>
+    for further information and usage.
 
 extra-source-files: README.md
 
