@@ -53,10 +53,8 @@ data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
 -- | Sink resource to write metrics to
 class MetricSink a where
-    -- ^ Write a metric to the sink.
-    push  :: Metric -> a -> IO ()
-    -- ^ Close the sink, any subsequent writes will throw an error.
-    close :: a -> IO ()
+    push  :: Metric -> a -> IO () -- ^ Write a metric to the sink.
+    close :: a -> IO ()           -- ^ Close the sink, any subsequent writes will throw an error.
 
 --
 -- API
