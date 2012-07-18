@@ -24,6 +24,22 @@ Supported Sinks:
 * `Network.Metrics.Graphite`
 * `Network.Metrics.Statsd`
 
+**To use the unified sink type:**
+
+````haskell
+{-# LANGUAGE OverloadedStrings #-}
+
+import Network.Metrics
+
+main = do
+    sink <- open Ganglia "localhost" "1234"
+    push metric sink
+    close sink
+  where
+    metric = Metric Counter "name.space" "bucket" "1234" -- Creates ganglia key: "name.space.bucket"
+````
+
+**To use a specific sink directly:**
 
 ````haskell
 {-# LANGUAGE OverloadedStrings #-}
