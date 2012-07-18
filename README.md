@@ -16,7 +16,8 @@ Table of Contents
 Usage
 -----
 
-Modules are intended to be import qualified if they need to be used in conjunction with each other.
+All modules including `Network.Metrics` expose the same interfaces to sinks, and re-export
+the required types for constructing metrics.
 
 Supported Sinks:
 
