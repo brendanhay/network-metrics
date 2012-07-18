@@ -26,7 +26,7 @@ module Network.Metrics.Ganglia (
 
     -- * Sink Functions
     , open
-    , MetricSink(push, close)
+    , Sink(push, close)
 
     -- * Re-exports
     , Group
@@ -80,7 +80,7 @@ instance Default GangliaMetric where
 -- | A handle to a Ganglia sink
 data Ganglia = Ganglia Handle deriving (Show)
 
-instance MetricSink Ganglia where
+instance Sink Ganglia where
     push m (Ganglia h) = hPush (encode m) h
     close  (Ganglia h) = hClose h
 

@@ -13,7 +13,7 @@
 module Network.Metrics.Statsd (
     -- * Sink Functions
       open
-    , MetricSink(push, close)
+    , Sink(push, close)
 
     -- * Re-exports
     , Group
@@ -45,7 +45,7 @@ data Sampled = Sampled | Exact | Ignore
 -- | A handle to a Statsd sink
 data Statsd = Statsd Handle deriving (Show)
 
-instance MetricSink Statsd where
+instance Sink Statsd where
     push m (Statsd h) = encode m >>= flip hPush h
     close  (Statsd h) = hClose h
 

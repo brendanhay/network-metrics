@@ -18,7 +18,7 @@ module Network.Metrics.Internal (
     , Value
     , MetricType(..)
     , Metric(..)
-    , MetricSink(..)
+    , Sink(..)
 
     -- * Socket Handle Functions
     , hOpen
@@ -52,7 +52,7 @@ data MetricType = Counter | Gauge | Timer deriving (Show)
 data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
 -- | Sink resource to write metrics to
-class MetricSink a where
+class Sink a where
     push  :: Metric -> a -> IO () -- ^ Write a metric to the sink.
     close :: a -> IO ()           -- ^ Close the sink, any subsequent writes will throw an error.
 
