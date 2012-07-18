@@ -34,6 +34,7 @@ import qualified Network.Metrics.Ganglia  as GA
 import qualified Network.Metrics.Graphite as GR
 import qualified Network.Metrics.Statsd   as S
 
+-- | An enumeration of supplied sink types
 data SinkType =
       Ganglia
     | Graphite
@@ -41,6 +42,7 @@ data SinkType =
     | Stdout
       deriving (Data, Typeable, Show)
 
+-- | A handle to a stdout sink
 data StdoutSink = StdoutSink
 
 instance MetricSink StdoutSink where
@@ -51,6 +53,7 @@ instance MetricSink StdoutSink where
 -- API
 --
 
+-- | Open a new sink specified by SinkType
 open :: SinkType -> String -> String -> IO Sink
 open = fn
   where

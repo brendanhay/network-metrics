@@ -60,7 +60,7 @@ data Slope = Zero | Positive | Negative | Both | Unspecified
 data GangliaType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Float | Double
       deriving (Data, Typeable, Eq, Show)
 
--- | concrete metric type used to emit metadata and value packets
+-- | Concrete metric type used to emit metadata and value packets
 data GangliaMetric = GangliaMetric
     { name  :: BS.ByteString
     , type' :: GangliaType
