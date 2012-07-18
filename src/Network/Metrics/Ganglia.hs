@@ -26,7 +26,7 @@ module Network.Metrics.Ganglia (
 
     -- * Sink Functions
     , open
-    , Sink(push, close)
+    , MetricSink(push, close)
 
     -- * Re-exports
     , Group
@@ -80,7 +80,7 @@ instance Default GangliaMetric where
 -- | A handle to a Ganglia sink
 data Ganglia = Ganglia Handle deriving (Show)
 
-instance Sink Ganglia where
+instance MetricSink Ganglia where
     push m (Ganglia h) = hPush (encode m) h
     close  (Ganglia h) = hClose h
 
@@ -104,8 +104,8 @@ defaultMetric = GangliaMetric
     }
 
 -- | Open a new Ganglia sink
-open :: String -> String -> IO Ganglia
-open host port = liftM Ganglia (hOpen Datagram host port)
+open :: String -> String -> IO Sink
+open host port = liftM (Sink . Ganglia) (hOpen Datagram host port)
 
 -- | Encode a GangliaMetric's metadata into a Binary.Put monad
 --

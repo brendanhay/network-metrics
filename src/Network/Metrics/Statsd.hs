@@ -13,7 +13,7 @@
 module Network.Metrics.Statsd (
     -- * Sink Functions
       open
-    , Sink(push, close)
+    , MetricSink(push, close)
 
     -- * Re-exports
     , Group
@@ -45,7 +45,7 @@ data Sampled = Sampled | Exact | Ignore
 -- | A handle to a Statsd sink
 data Statsd = Statsd Handle deriving (Show)
 
-instance Sink Statsd where
+instance MetricSink Statsd where
     push m (Statsd h) = encode m >>= flip hPush h
     close  (Statsd h) = hClose h
 
@@ -54,8 +54,8 @@ instance Sink Statsd where
 --
 
 -- | Open a new Statsd sink
-open :: String -> String -> IO Statsd
-open host port = liftM Statsd (hOpen Datagram host port)
+open :: String -> String -> IO Sink
+open host port = liftM (Sink . Statsd) (hOpen Datagram host port)
 
 --
 -- Private

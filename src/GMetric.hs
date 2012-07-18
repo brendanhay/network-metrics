@@ -14,9 +14,11 @@ module Main (
       main
     ) where
 
-import Control.Monad            (when)
+
+import Control.Monad            (liftM, when)
 import Data.Binary.Put          (runPut)
 import Data.ByteString.Char8    (pack)
+import Network.Socket           (SocketType(..))
 import System.Console.CmdArgs
 import System.Environment       (getArgs, withArgs)
 import System.Exit              (ExitCode(..), exitWith)
@@ -51,7 +53,7 @@ main = parse >>= emit
 
 emit :: Options -> IO ()
 emit Options{..} = do
-    sink@(G.Ganglia hd) <- G.open optHost optPort
+    sink@(G.Ganglia hd) <- liftM G.Ganglia (hOpen Datagram optHost optPort)
     _ <- push' G.putMetaData hd
     _ <- push' G.putValue hd
     G.close sink

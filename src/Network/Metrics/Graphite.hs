@@ -13,7 +13,7 @@
 module Network.Metrics.Graphite (
     -- * Sink Functions
       open
-    , Sink(push, close)
+    , MetricSink(push, close)
 
     -- * Re-exports
     , Group
@@ -34,7 +34,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 -- | A handle to a Graphite sink
 data Graphite = Graphite Handle deriving (Show)
 
-instance Sink Graphite where
+instance MetricSink Graphite where
     push m (Graphite h) = encode m >>= flip hPush h
     close  (Graphite h) = hClose h
 
@@ -43,8 +43,8 @@ instance Sink Graphite where
 --
 
 -- | Open a new Graphite sink
-open :: String -> String -> IO Graphite
-open host port = liftM Graphite (hOpen Stream host port)
+open :: String -> String -> IO Sink
+open host port = liftM (Sink . Graphite) (hOpen Stream host port)
 
 --
 -- Private

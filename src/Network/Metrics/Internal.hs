@@ -1,3 +1,5 @@
+{-# LANGUAGE ExistentialQuantification #-}
+
 -- |
 -- Module      : Network.Metrics.Internal
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
@@ -18,6 +20,7 @@ module Network.Metrics.Internal (
     , Value
     , MetricType(..)
     , Metric(..)
+    , MetricSink(..)
     , Sink(..)
 
     -- * Socket Handle Functions
@@ -52,9 +55,17 @@ data MetricType = Counter | Gauge | Timer deriving (Show)
 data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
 -- | Sink resource to write metrics to
-class Sink a where
+class MetricSink a where
     push  :: Metric -> a -> IO () -- ^ Write a metric to the sink.
     close :: a -> IO ()           -- ^ Close the sink, any subsequent writes will throw an error.
+
+-- | Existential sink type
+data Sink = forall a. MetricSink a => Sink a
+
+-- | Existential sink instance
+instance MetricSink Sink where
+    push m (Sink s) = push m s
+    close  (Sink s) = close s
 
 --
 -- API

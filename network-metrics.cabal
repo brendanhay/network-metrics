@@ -1,5 +1,5 @@
 name:               network-metrics
-version:            0.1.5
+version:            0.1.6
 synopsis:           Send metrics to Ganglia, Graphite, and statsd.
 license:            OtherLicense
 license-file:       LICENSE
@@ -32,7 +32,8 @@ source-repository head
   location: git://github.com/brendanhay/network-metrics.git
 
 library
-  exposed-modules:  Network.Metrics.Ganglia
+  exposed-modules:  Network.Metrics
+                  , Network.Metrics.Ganglia
                   , Network.Metrics.Graphite
                   , Network.Metrics.Statsd
   other-modules:    Network.Metrics.Internal
