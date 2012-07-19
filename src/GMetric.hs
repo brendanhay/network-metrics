@@ -58,7 +58,7 @@ emit Options{..} = do
     _ <- push' G.putValue hd
     G.close sink
   where
-    push' f = hPush . runPut $ f metric
+    push' f = flip hPush . runPut $ f metric
     metric  = G.GangliaMetric
         (pack optName)
         optType

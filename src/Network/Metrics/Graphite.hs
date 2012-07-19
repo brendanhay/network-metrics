@@ -35,8 +35,8 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 data Graphite = Graphite Handle deriving (Show)
 
 instance MetricSink Graphite where
-    push m (Graphite h) = encode m >>= flip hPush h
-    close  (Graphite h) = hClose h
+    push  (Graphite h) m  = encode m >>= hPush h
+    close (Graphite h)    = hClose h
 
 --
 -- API

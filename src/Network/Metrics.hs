@@ -43,7 +43,7 @@ data SinkType =
       deriving (Data, Typeable, Show)
 
 -- | A handle to a stdout sink
-data StdoutSink = StdoutSink
+data StdoutSink = StdoutSink deriving (Show)
 
 instance MetricSink StdoutSink where
     push m _ = print m

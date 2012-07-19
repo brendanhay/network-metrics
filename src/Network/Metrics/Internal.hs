@@ -29,7 +29,7 @@ module Network.Metrics.Internal (
     , hPush
     ) where
 
-import Control.Monad                  (unless)
+import Control.Monad                  (unless, void)
 import Network.Socket                 hiding (send)
 import Network.Socket.ByteString.Lazy (send)
 
@@ -56,16 +56,24 @@ data Metric = Metric MetricType Group Bucket Value deriving (Show)
 
 -- | Sink resource to write metrics to
 class MetricSink a where
-    push  :: Metric -> a -> IO () -- ^ Write a metric to the sink.
-    close :: a -> IO ()           -- ^ Close the sink, any subsequent writes will throw an error.
+    -- | Write a metric to the sink.
+    push  :: a -> Metric -> IO ()
+
+    -- | Close the sink - subsequent writes will throw an error.
+    close :: a -> IO ()
+
+    -- | Effeciently write multiple metrics simultaneously.
+    mpush :: a -> [Metric] -> IO ()
+    mpush s = void . mapM (push s)
 
 -- | Existential sink type
 data Sink = forall a. MetricSink a => Sink a
 
 -- | Existential sink instance
 instance MetricSink Sink where
-    push m (Sink s) = push m s
-    close  (Sink s) = close s
+    push  (Sink s) = push s
+    mpush (Sink s) = mpush s
+    close (Sink s) = close s
 
 --
 -- API
@@ -83,8 +91,8 @@ hClose :: Handle -> IO ()
 hClose (Handle sock _) = sClose sock
 
 -- | Direct access for writing a bytestring to a socket handle
-hPush :: BL.ByteString -> Handle -> IO ()
-hPush bstr (Handle sock addr) | BL.null bstr = return ()
+hPush :: Handle -> BL.ByteString -> IO ()
+hPush (Handle sock addr) bstr | BL.null bstr = return ()
                               | otherwise    = do
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- send sock bstr

@@ -23,9 +23,9 @@ module Network.Metrics.Statsd (
     , Metric(..)
     ) where
 
-import Control.Monad  (liftM)
-import Network.Socket (SocketType(..))
-import System.Random  (randomRIO)
+import Control.Monad            (liftM)
+import Network.Socket           (SocketType(..))
+import System.Random            (randomRIO)
 import Network.Metrics.Internal
 
 import qualified Data.ByteString.Char8      as BS
@@ -46,8 +46,8 @@ data Sampled = Sampled | Exact | Ignore
 data Statsd = Statsd Handle deriving (Show)
 
 instance MetricSink Statsd where
-    push m (Statsd h) = encode m >>= flip hPush h
-    close  (Statsd h) = hClose h
+    push  (Statsd h) m  = encode m >>= hPush h
+    close (Statsd h)    = hClose h
 
 --
 -- API

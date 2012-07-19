@@ -81,8 +81,8 @@ instance Default GangliaMetric where
 data Ganglia = Ganglia Handle deriving (Show)
 
 instance MetricSink Ganglia where
-    push m (Ganglia h) = hPush (encode m) h
-    close  (Ganglia h) = hClose h
+    push  (Ganglia h) = hPush h . encode
+    close (Ganglia h) = hClose h
 
 --
 -- API
