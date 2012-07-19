@@ -30,6 +30,7 @@ module Network.Metrics.Internal (
     , hPush
     ) where
 
+import Data.Typeable                  (Typeable)
 import Control.Monad                  (unless, void)
 import Network.Socket                 hiding (send)
 import Network.Socket.ByteString.Lazy (send)
@@ -53,9 +54,9 @@ data Metric a =
       deriving (Show)
 
 -- | A Metric's value
-class Encodable a where
+class (Show a, Typeable a) => Encodable a where
     -- | Encode the value as a bytestring
-    encode :: Typeable a => a -> BS.ByteString
+    encode :: a -> BS.ByteString
 
 instance Encodable Int where
     encode = BS.pack . show

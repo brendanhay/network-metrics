@@ -41,6 +41,7 @@ import Data.Char                (toLower)
 import Data.Data                (Data, Typeable)
 import Data.Default             (Default, def)
 import Data.Int                 (Int32)
+import Data.Typeable            (Typeable, typeOf)
 import Data.Word                (Word32)
 import Network.Socket           (SocketType(..))
 import Network.Metrics.Internal
@@ -81,9 +82,9 @@ data Ganglia = Ganglia Handle deriving (Show)
 instance Sink Ganglia where
     push  (Ganglia h) = hPush h . enc
       where
-        enc (Counter g b v) = put g b v Int32 Positive
-        enc (Timer g b v)   = put g b v Double Both
-        enc (Gauge g b v)   = put g b v String Both
+        enc (Counter g b v) = put g b v Positive
+        enc (Timer g b v)   = put g b v Both
+        enc (Gauge g b v)   = put g b v Both
 
     close (Ganglia h) = hClose h
 
@@ -147,18 +148,28 @@ put :: Encodable a
     => Group
     -> Bucket
     -> a
-    -> GangliaType
     -> Slope
     -> BL.ByteString
-put g b v t s = BL.concat $ map runPut [putMetaData m, putValue m]
+put g b v s = BL.concat $ map runPut [putMetaData m, putValue m]
   where
      m = defaultMetric
          { name  = b
          , group = g
          , value = encode v
-         , type' = t
+         , type' = determineType v
          , slope = s
          }
+
+-- | TODO: more horror
+determineType :: Typeable a => a -> GangliaType
+determineType t = case show $ typeOf t of
+    "Int16"   -> Int16
+    "Int"     -> Int32
+    "Integer" -> Int32
+    "Int32"   -> Int32
+    "Float"   -> Float
+    "Double"  -> Double
+    _         -> String
 
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> GangliaMetric -> Put
