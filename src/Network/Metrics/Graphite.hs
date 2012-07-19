@@ -18,8 +18,6 @@ module Network.Metrics.Graphite (
     -- * Re-exports
     , Group
     , Bucket
-    , Value
-    , MetricType(..)
     , Metric(..)
     ) where
 
@@ -51,10 +49,15 @@ open host port = liftM (Sink . Graphite) (hOpen Stream host port)
 --
 
 -- | Encode a metric into the Graphite format
-encode :: Metric -> IO BL.ByteString
-encode (Metric _ g b v) = liftM bstr getPOSIXTime
+encode :: MetricValue a => Metric a -> IO BL.ByteString
+encode (Counter g b v) = put g b v
+encode (Gauge g b v)   = put g b v
+encode (Timer g b v)   = put g b v
+
+put :: MetricValue a => Group -> Bucket -> a -> IO BL.ByteString
+put g b v = liftM bstr getPOSIXTime
   where
     bucket      = BS.concat [g, ".", b]
     timestamp n = BS.pack $ show (truncate n :: Integer)
-    bstr n      = BL.fromChunks [bucket, v, timestamp n]
+    bstr n      = BL.fromChunks [bucket, enc v, timestamp n]
 

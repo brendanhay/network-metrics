@@ -21,9 +21,8 @@ module Network.Metrics (
     -- * Re-exports
     , Group
     , Bucket
-    , Value
-    , MetricType(..)
     , Metric(..)
+    , MetricValue
     , Sink(..)
     ) where
 

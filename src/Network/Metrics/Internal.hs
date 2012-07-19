@@ -17,10 +17,9 @@ module Network.Metrics.Internal (
       Handle(..)
     , Group
     , Bucket
-    , Value
-    , MetricType(..)
     , Metric(..)
     , MetricSink(..)
+    , MetricValue(..)
     , Sink(..)
 
     -- * Socket Handle Functions
@@ -45,25 +44,26 @@ type Group = BS.ByteString
 -- | Metric bucket
 type Bucket = BS.ByteString
 
--- | Metric value
-type Value = BS.ByteString
-
--- | Metric type
-data MetricType = Counter | Gauge | Timer deriving (Show)
-
 -- | Concrete metric data type
-data Metric = Metric MetricType Group Bucket Value deriving (Show)
+data Metric a =
+      Counter Group Bucket a
+    | Gauge Group Bucket a
+    | Timer Group Bucket a
+      deriving (Show)
+
+class MetricValue a where
+    enc :: a -> BS.ByteString
 
 -- | Sink resource to write metrics to
 class MetricSink a where
     -- | Write a metric to the sink.
-    push  :: a -> Metric -> IO ()
+    push  :: MetricValue b => a -> Metric b -> IO ()
 
     -- | Close the sink - subsequent writes will throw an error.
     close :: a -> IO ()
 
     -- | Effeciently write multiple metrics simultaneously.
-    mpush :: a -> [Metric] -> IO ()
+    mpush :: MetricValue b => a -> [Metric b] -> IO ()
     mpush s = void . mapM (push s)
 
 -- | Existential sink type

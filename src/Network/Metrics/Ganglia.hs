@@ -31,8 +31,6 @@ module Network.Metrics.Ganglia (
     -- * Re-exports
     , Group
     , Bucket
-    , Value
-    , MetricType(..)
     , Metric(..)
     ) where
 
@@ -56,7 +54,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 data Slope = Zero | Positive | Negative | Both | Unspecified
       deriving (Data, Typeable, Show, Eq, Enum)
 
--- | Metric types supported by Ganglia
+-- -- | Metric types supported by Ganglia
 data GangliaType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Float | Double
       deriving (Data, Typeable, Eq, Show)
 
@@ -140,14 +138,21 @@ bufferSize :: Integer
 bufferSize = 1500
 
 -- | Encode a metric into the Ganglia format
-encode :: Metric -> BL.ByteString
-encode (Metric t g b v) = BL.concat $ map put [putMetaData, putValue]
+encode :: MetricValue a => Metric a -> BL.ByteString
+encode (Counter g b v) = put g b (enc v) Int32 Positive
+encode (Gauge g b v)   = put g b (enc v) Int32 Both
+encode (Timer g b v)   = put g b (enc v) Int32 Both
+
+put :: Group -> Bucket -> BS.ByteString -> GangliaType -> Slope -> BL.ByteString
+put g b v t s = BL.concat $ map runPut [putMetaData m, putValue m]
   where
-    slope' = case t of
-        Counter -> Positive
-        _       -> Both
-    metric = defaultMetric { name  = b, group = g, value = v, slope = slope' }
-    put f  = runPut $ f metric
+     m = defaultMetric
+         { name  = b
+         , group = g
+         , value = v
+         , type' = t
+         , slope = s
+         }
 
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> GangliaMetric -> Put

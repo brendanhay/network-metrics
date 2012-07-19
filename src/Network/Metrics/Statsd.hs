@@ -18,8 +18,6 @@ module Network.Metrics.Statsd (
     -- * Re-exports
     , Group
     , Bucket
-    , Value
-    , MetricType(..)
     , Metric(..)
     ) where
 
@@ -30,14 +28,6 @@ import Network.Metrics.Internal
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
-
--- | An internal record used to describe a Statsd metric
-data StatsdMetric = StatsdMetric
-    { type'  :: MetricType
-    , bucket :: BS.ByteString
-    , value  :: BS.ByteString
-    , rate   :: Double
-    } deriving (Show)
 
 -- | The sample status of a metric
 data Sampled = Sampled | Exact | Ignore
@@ -62,27 +52,29 @@ open host port = liftM (Sink . Statsd) (hOpen Datagram host port)
 --
 
 -- | Encode a metric into the Statsd format
-encode :: Metric -> IO BL.ByteString
-encode (Metric t g b v) = liftM bstr (randomRIO (0.0, 1.0))
+encode :: MetricValue a => Metric a -> IO BL.ByteString
+encode (Counter g b v) = put g b v "c" 1.0
+encode (Gauge g b v)   = put g b v "g" 1.0
+encode (Timer g b v)   = put g b v "ms" 1.0
+
+-- | TODO: Currently statsd sampling is not exposed via the global metric type
+put :: MetricValue a
+    => Group
+    -> Bucket
+    -> a
+    -> BS.ByteString
+    -> Double
+    -> IO BL.ByteString
+put g b v t rate = liftM bstr (randomRIO (0.0, 1.0))
   where
-    metric = StatsdMetric t (BS.concat [g, ".", b]) v 1.0
-    bstr   = BL.fromChunks . chunks metric . sample (rate metric)
+    bucket = BS.concat [g, ".", b]
+    base   = [bucket, ":", enc v, "|", t]
+    bstr n = BL.fromChunks $ case sample rate n of
+        Sampled -> base ++ ["@", BS.pack $ show rate]
+        Exact   -> base
+        Ignore  -> []
 
 sample :: Double -> Double -> Sampled
 sample rate rand | rate < 1.0 && rand <= rate = Sampled
                  | rate == 1.0                = Exact
                  | otherwise                  = Ignore
-
-chunks :: StatsdMetric -> Sampled -> [BS.ByteString]
-chunks StatsdMetric{..} sampled = case sampled of
-    Sampled -> base ++ ["@", BS.pack $ show rate]
-    Exact   -> base
-    Ignore  -> []
-  where
-    base = [bucket, ":", value, "|", suffix type']
-
-suffix :: MetricType -> BS.ByteString
-suffix typ = case typ of
-    Counter -> "c"
-    Gauge   -> "g"
-    Timer   -> "ms"
