@@ -27,6 +27,7 @@ source-repository head
   type:     git
   location: git://github.com/brendanhay/network-metrics.git
 
+
 library
   exposed-modules:  Network.Metrics
                   , Network.Metrics.Ganglia
@@ -41,6 +42,8 @@ library
                     OverloadedStrings
                   , DeriveDataTypeable
                   , RecordWildCards
+                  , TypeSynonymInstances
+                  , FlexibleInstances
 
   ghc-options:      -Wall -O2 -rtsopts
   ghc-prof-options: -prof -auto-all
@@ -63,6 +66,8 @@ executable gmetric-haskell
                     OverloadedStrings
                   , DeriveDataTypeable
                   , RecordWildCards
+                  , TypeSynonymInstances
+                  , FlexibleInstances
 
   ghc-options:      -Wall -O2 -threaded -rtsopts
   ghc-prof-options: -prof -auto-all -with-rtsopts=-p

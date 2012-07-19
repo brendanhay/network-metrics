@@ -19,7 +19,9 @@ module Network.Metrics.Internal (
     , Bucket
     , Metric(..)
     , MetricSink(..)
-    , MetricValue(..)
+
+    -- * Exported Type Classes
+    , Encodable(..)
     , Sink(..)
 
     -- * Socket Handle Functions
@@ -44,36 +46,46 @@ type Group = BS.ByteString
 -- | Metric bucket
 type Bucket = BS.ByteString
 
--- | Concrete metric data type
 data Metric a =
-      Counter Group Bucket a
+      Counter Group Bucket Int
+    | Timer Group Bucket Double
     | Gauge Group Bucket a
-    | Timer Group Bucket a
       deriving (Show)
 
-class MetricValue a where
-    enc :: a -> BS.ByteString
+-- | A Metric's value
+class Encodable a where
+    -- | Encode the value as a bytestring
+    encode :: Typeable a => a -> BS.ByteString
+
+instance Encodable Int where
+    encode = BS.pack . show
+
+instance Encodable Double where
+    encode = BS.pack . show
+
+instance Encodable String where
+    encode = BS.pack
 
 -- | Sink resource to write metrics to
-class MetricSink a where
+class Sink a where
     -- | Write a metric to the sink.
-    push  :: MetricValue b => a -> Metric b -> IO ()
+    push  :: Encodable b => a -> Metric b -> IO ()
 
     -- | Close the sink - subsequent writes will throw an error.
     close :: a -> IO ()
 
     -- | Effeciently write multiple metrics simultaneously.
-    mpush :: MetricValue b => a -> [Metric b] -> IO ()
+    mpush :: Encodable b => a -> [Metric b] -> IO ()
     mpush s = void . mapM (push s)
 
 -- | Existential sink type
-data Sink = forall a. MetricSink a => Sink a
+data MetricSink = forall a. Sink a => MetricSink a
 
 -- | Existential sink instance
-instance MetricSink Sink where
-    push  (Sink s) = push s
-    mpush (Sink s) = mpush s
-    close (Sink s) = close s
+instance Sink MetricSink where
+    push  (MetricSink s) = push s
+    mpush (MetricSink s) = mpush s
+    close (MetricSink s) = close s
 
 --
 -- API

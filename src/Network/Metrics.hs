@@ -16,14 +16,13 @@ module Network.Metrics (
 
     -- * Sink Functions
     , open
-    , MetricSink(push, close)
+    , Sink(push, close)
 
     -- * Re-exports
     , Group
     , Bucket
     , Metric(..)
-    , MetricValue
-    , Sink(..)
+    , MetricSink(..)
     ) where
 
 import Data.Data                (Data, Typeable)
@@ -44,19 +43,19 @@ data SinkType =
 -- | A handle to a stdout sink
 data StdoutSink = StdoutSink deriving (Show)
 
-instance MetricSink StdoutSink where
-    push m _ = print m
-    close _  = return ()
+instance Sink StdoutSink where
+    push  _ = print
+    close _ = return ()
 
 --
 -- API
 --
 
 -- | Open a new sink specified by SinkType
-open :: SinkType -> String -> String -> IO Sink
+open :: SinkType -> String -> String -> IO MetricSink
 open = fn
   where
     fn Ganglia  = GA.open
     fn Graphite = GR.open
     fn Statsd   = S.open
-    fn Stdout   = \_ _ -> return $ Sink StdoutSink
+    fn Stdout   = \_ _ -> return $ MetricSink StdoutSink

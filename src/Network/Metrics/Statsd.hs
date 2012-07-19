@@ -13,12 +13,12 @@
 module Network.Metrics.Statsd (
     -- * Sink Functions
       open
-    , MetricSink(push, close)
+    , Sink(push, close)
 
     -- * Re-exports
     , Group
     , Bucket
-    , Metric(..)
+    , MetricSink(..)
     ) where
 
 import Control.Monad            (liftM)
@@ -35,30 +35,29 @@ data Sampled = Sampled | Exact | Ignore
 -- | A handle to a Statsd sink
 data Statsd = Statsd Handle deriving (Show)
 
-instance MetricSink Statsd where
-    push  (Statsd h) m  = encode m >>= hPush h
-    close (Statsd h)    = hClose h
+instance Sink Statsd where
+    push  (Statsd h) m  = enc m >>= hPush h
+      where
+        enc (Counter g b v) = put g b v "c" 1.0
+        enc (Gauge g b v)   = put g b v "g" 1.0
+        enc (Timer g b v)   = put g b v "ms" 1.0
+
+    close (Statsd h) = hClose h
 
 --
 -- API
 --
 
 -- | Open a new Statsd sink
-open :: String -> String -> IO Sink
-open host port = liftM (Sink . Statsd) (hOpen Datagram host port)
+open :: String -> String -> IO MetricSink
+open host port = liftM (MetricSink . Statsd) (hOpen Datagram host port)
 
 --
 -- Private
 --
-
 -- | Encode a metric into the Statsd format
-encode :: MetricValue a => Metric a -> IO BL.ByteString
-encode (Counter g b v) = put g b v "c" 1.0
-encode (Gauge g b v)   = put g b v "g" 1.0
-encode (Timer g b v)   = put g b v "ms" 1.0
-
--- | TODO: Currently statsd sampling is not exposed via the global metric type
-put :: MetricValue a
+-- *TODO:* Currently statsd sampling is not exposed via the global metric type
+put :: Encodable a
     => Group
     -> Bucket
     -> a
@@ -68,7 +67,7 @@ put :: MetricValue a
 put g b v t rate = liftM bstr (randomRIO (0.0, 1.0))
   where
     bucket = BS.concat [g, ".", b]
-    base   = [bucket, ":", enc v, "|", t]
+    base   = [bucket, ":", encode v, "|", t]
     bstr n = BL.fromChunks $ case sample rate n of
         Sampled -> base ++ ["@", BS.pack $ show rate]
         Exact   -> base

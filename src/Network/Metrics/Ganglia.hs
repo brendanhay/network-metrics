@@ -26,7 +26,7 @@ module Network.Metrics.Ganglia (
 
     -- * Sink Functions
     , open
-    , MetricSink(push, close)
+    , Sink(push, close)
 
     -- * Re-exports
     , Group
@@ -54,7 +54,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 data Slope = Zero | Positive | Negative | Both | Unspecified
       deriving (Data, Typeable, Show, Eq, Enum)
 
--- -- | Metric types supported by Ganglia
+-- | Metric types supported by Ganglia
 data GangliaType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Float | Double
       deriving (Data, Typeable, Eq, Show)
 
@@ -78,8 +78,13 @@ instance Default GangliaMetric where
 -- | A handle to a Ganglia sink
 data Ganglia = Ganglia Handle deriving (Show)
 
-instance MetricSink Ganglia where
-    push  (Ganglia h) = hPush h . encode
+instance Sink Ganglia where
+    push  (Ganglia h) = hPush h . enc
+      where
+        enc (Counter g b v) = put g b v Int32 Positive
+        enc (Timer g b v)   = put g b v Double Both
+        enc (Gauge g b v)   = put g b v String Both
+
     close (Ganglia h) = hClose h
 
 --
@@ -102,8 +107,8 @@ defaultMetric = GangliaMetric
     }
 
 -- | Open a new Ganglia sink
-open :: String -> String -> IO Sink
-open host port = liftM (Sink . Ganglia) (hOpen Datagram host port)
+open :: String -> String -> IO MetricSink
+open host port = liftM (MetricSink . Ganglia) (hOpen Datagram host port)
 
 -- | Encode a GangliaMetric's metadata into a Binary.Put monad
 --
@@ -137,19 +142,20 @@ putValue m@GangliaMetric{..} = do
 bufferSize :: Integer
 bufferSize = 1500
 
--- | Encode a metric into the Ganglia format
-encode :: MetricValue a => Metric a -> BL.ByteString
-encode (Counter g b v) = put g b (enc v) Int32 Positive
-encode (Gauge g b v)   = put g b (enc v) Int32 Both
-encode (Timer g b v)   = put g b (enc v) Int32 Both
-
-put :: Group -> Bucket -> BS.ByteString -> GangliaType -> Slope -> BL.ByteString
+-- | Oh, the horror
+put :: Encodable a
+    => Group
+    -> Bucket
+    -> a
+    -> GangliaType
+    -> Slope
+    -> BL.ByteString
 put g b v t s = BL.concat $ map runPut [putMetaData m, putValue m]
   where
      m = defaultMetric
          { name  = b
          , group = g
-         , value = v
+         , value = encode v
          , type' = t
          , slope = s
          }
