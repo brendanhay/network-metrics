@@ -53,9 +53,7 @@ instance Sink StdoutSink where
 
 -- | Open a new sink specified by SinkType
 open :: SinkType -> String -> String -> IO MetricSink
-open = fn
-  where
-    fn Ganglia  = GA.open
-    fn Graphite = GR.open
-    fn Statsd   = S.open
-    fn Stdout   = \_ _ -> return $ MetricSink StdoutSink
+open Ganglia  = GA.open
+open Graphite = GR.open
+open Statsd   = S.open
+open Stdout   = \_ _ -> return $ MetricSink StdoutSink
