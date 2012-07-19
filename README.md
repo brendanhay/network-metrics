@@ -36,7 +36,7 @@ Supported Sinks:
 import Network.Metrics
 
 main = do
-    sink <- open "localhost" "1234"
+    sink <- open Ganglia "localhost" "1234"
     push sink $ Counter "name.space" "bucket" 1234 -- Creates ganglia key: "name.space.bucket" with an "int32" type
     close sink
 ````
@@ -50,7 +50,7 @@ main = do
 import Network.Metrics.Graphite
 
 main = do
-    sink <- open Graphite "localhost" "1234"
+    sink <- open "localhost" "1234"
     push sink $ Counter "name.space" "bucket" 1234 -- Creates graphite key: "name.space.bucket"
     close sink
 
