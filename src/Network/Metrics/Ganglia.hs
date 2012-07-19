@@ -150,26 +150,16 @@ put :: Encodable a
     -> a
     -> Slope
     -> BL.ByteString
-put g b v s = BL.concat $ map runPut [putMetaData m, putValue m]
+put group bucket value slope =
+     BL.concat $ map runPut [putMetaData metric, putValue metric]
   where
-     m = defaultMetric
-         { name  = b
-         , group = g
-         , value = encode v
-         , type' = determineType v
-         , slope = s
+     metric = defaultMetric
+         { name  = bucket
+         , group = group
+         , value = encode value
+         , type' = determineType value
+         , slope = slope
          }
-
--- | TODO: more horror
-determineType :: Typeable a => a -> GangliaType
-determineType t = case show $ typeOf t of
-    "Int16"   -> Int16
-    "Int"     -> Int32
-    "Integer" -> Int32
-    "Int32"   -> Int32
-    "Float"   -> Float
-    "Double"  -> Double
-    _         -> String
 
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> GangliaMetric -> Put
@@ -209,3 +199,14 @@ putString bstr = do
 
 putType :: GangliaType -> Put
 putType = putString . BS.pack . map toLower . show
+
+-- | TODO: more horror
+determineType :: Typeable a => a -> GangliaType
+determineType t = case show $ typeOf t of
+    "Int16"   -> Int16
+    "Int"     -> Int32
+    "Integer" -> Int32
+    "Int32"   -> Int32
+    "Float"   -> Float
+    "Double"  -> Double
+    _         -> String
