@@ -37,7 +37,8 @@ import Network.Metrics
 
 main = do
     sink <- open Ganglia "localhost" "1234"
-    push sink $ Counter "name.space" "bucket" 1234 -- Creates ganglia key: "name.space.bucket" with an "int32" type
+    -- Creates ganglia key: "name.space.bucket" with an "int32" type
+    push sink $ Counter "name.space" "bucket" 1234
     close sink
 ````
 
@@ -51,9 +52,9 @@ import Network.Metrics.Graphite
 
 main = do
     sink <- open "localhost" "1234"
-    push sink $ Counter "name.space" "bucket" 1234 -- Creates graphite key: "name.space.bucket"
+    -- Creates graphite key: "name.space.bucket"
+    push sink $ Counter "name.space" "bucket" 1234
     close sink
-
 ````
 
 
