@@ -40,7 +40,7 @@ main = do
     push sink sink
     close sink
   where
-    metric = Metric Counter "name.space" "bucket" "1234" -- Creates ganglia key: "name.space.bucket"
+    metric = Counter "name.space" "bucket" 1234 -- Creates ganglia key: "name.space.bucket" with an "int32" type
 ````
 
 **To use a specific sink directly:**
@@ -55,7 +55,7 @@ main = do
     push sink sink
     close sink
   where
-    metric = Metric Counter "name.space" "bucket" "1234" -- Creates graphite key: "name.space.bucket"
+    metric = Counter "name.space" "bucket" 1234 -- Creates graphite key: "name.space.bucket"
 ````
 
 
