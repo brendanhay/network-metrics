@@ -64,7 +64,7 @@ API
 
 Preliminary API documentation is available [on Hackage](http://hackage.haskell.org/package/network-metrics).
 
-> The API is currently in flux, and conversion between the universal `Metric` `Counter` `Gauge` `Timing` type to the respective sink types is not completed.
+> The API is currently in flux, and conversion between the universal `Counter`, `Gauge`, and `Timing` ctors to the respective sink types is not completed.
 
 
 <a name="gmetric" />
