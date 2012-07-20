@@ -65,6 +65,9 @@ class (Show a, Typeable a) => Encodable a where
 instance Encodable Int where
     encode = BS.pack . show
 
+instance Encodable Integer where
+    encode = BS.pack . show
+
 instance Encodable Double where
     encode = BS.pack . show
 

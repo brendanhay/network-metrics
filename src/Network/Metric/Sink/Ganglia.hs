@@ -26,7 +26,7 @@ module Network.Metric.Sink.Ganglia (
 
     -- * Sink Functions
     , open
-    , Sink(push, mpush, close)
+    , Sink(..)
 
     -- * Re-exports
     , Group

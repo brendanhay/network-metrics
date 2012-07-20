@@ -13,7 +13,7 @@
 module Network.Metric.Sink.Stdout (
     -- * Sink Functions
       open
-    , Sink(push, mpush, close)
+    , Sink(..)
 
     -- * Re-exports
     , Group
