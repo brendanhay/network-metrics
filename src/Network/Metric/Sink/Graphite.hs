@@ -1,5 +1,5 @@
 -- |
--- Module      : Network.Metric.Graphite
+-- Module      : Network.Metric.Sink.Graphite
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metric.Graphite (
+module Network.Metric.Sink.Graphite (
     -- * Sink Functions
       open
     , Sink(push, close)

@@ -25,12 +25,12 @@ module Network.Metric (
     , MetricSink(..)
     ) where
 
-import Data.Data                (Data, Typeable)
+import Data.Data               (Data, Typeable)
 import Network.Metric.Internal
 
-import qualified Network.Metric.Ganglia  as GA
-import qualified Network.Metric.Graphite as GR
-import qualified Network.Metric.Statsd   as S
+import qualified Network.Metric.Sink.Ganglia  as GA
+import qualified Network.Metric.Sink.Graphite as GR
+import qualified Network.Metric.Sink.Statsd   as S
 
 -- | An enumeration of supplied sink types
 data SinkType =

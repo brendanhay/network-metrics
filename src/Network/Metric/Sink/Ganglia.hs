@@ -1,5 +1,5 @@
 -- |
--- Module      : Network.Metric.Ganglia
+-- Module      : Network.Metric.Sink.Ganglia
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metric.Ganglia (
+module Network.Metric.Sink.Ganglia (
     -- * Exported Types
       Slope(..)
     , GangliaType(..)
