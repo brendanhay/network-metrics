@@ -50,7 +50,7 @@ instance Sink Statsd where
 
 -- | Open a new Statsd sink
 open :: String -> String -> IO MetricSink
-open host port = liftM (MetricSink . Statsd) (hOpen Datagram host port)
+open = fOpen Statsd Datagram
 
 --
 -- Private
@@ -64,10 +64,9 @@ put :: Encodable a
     -> BS.ByteString
     -> Double
     -> IO BL.ByteString
-put g b v t rate = liftM bstr (randomRIO (0.0, 1.0))
+put group bucket value typ rate = liftM bstr (randomRIO (0.0, 1.0))
   where
-    bucket = BS.concat [g, ".", b]
-    base   = [bucket, ":", encode v, "|", t]
+    base   = [key group bucket, ":", encode value, "|", typ]
     bstr n = BL.fromChunks $ case sample rate n of
         Sampled -> base ++ ["@", BS.pack $ show rate]
         Exact   -> base

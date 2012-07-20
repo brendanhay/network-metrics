@@ -21,9 +21,9 @@ module Network.Metric.Sink.Graphite (
     , Metric(..)
     ) where
 
-import Control.Monad            (liftM)
-import Network.Socket
-import Data.Time.Clock.POSIX
+import Control.Monad           (liftM)
+import Network.Socket          (SocketType(..))
+import Data.Time.Clock.POSIX   (getPOSIXTime)
 import Network.Metric.Internal
 
 import qualified Data.ByteString.Char8      as BS
@@ -47,7 +47,7 @@ instance Sink Graphite where
 
 -- | Open a new Graphite sink
 open :: String -> String -> IO MetricSink
-open host port = liftM (MetricSink . Graphite) (hOpen Stream host port)
+open = fOpen Graphite Stream
 
 --
 -- Private
@@ -55,9 +55,8 @@ open host port = liftM (MetricSink . Graphite) (hOpen Stream host port)
 
 -- | Encode a metric into the Graphite format
 put :: Encodable a => Group -> Bucket -> a -> IO BL.ByteString
-put g b v = liftM bstr getPOSIXTime
+put group bucket value = liftM bstr getPOSIXTime
   where
-    bucket      = BS.concat [g, ".", b]
     timestamp n = BS.pack $ show (truncate n :: Integer)
-    bstr n      = BL.fromChunks [bucket, encode v, timestamp n]
+    bstr n      = BL.fromChunks [key group bucket, encode value, timestamp n]
 

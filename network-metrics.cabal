@@ -29,11 +29,12 @@ source-repository head
 
 
 library
-  exposed-modules:  Network.Metrics
-                  , Network.Metrics.Ganglia
-                  , Network.Metrics.Graphite
-                  , Network.Metrics.Statsd
-  other-modules:    Network.Metrics.Internal
+  exposed-modules:  Network.Metric
+                  , Network.Metric.Sink.Ganglia
+                  , Network.Metric.Sink.Graphite
+                  , Network.Metric.Sink.Statsd
+                  , Network.Metric.Sink.Stdout
+  other-modules:    Network.Metric.Internal
 
   hs-source-dirs:   src
 

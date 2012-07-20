@@ -22,9 +22,9 @@ import Network.Socket           (SocketType(..))
 import System.Console.CmdArgs
 import System.Environment       (getArgs, withArgs)
 import System.Exit              (ExitCode(..), exitWith)
-import Network.Metrics.Internal
+import Network.Metric.Internal
 
-import qualified Network.Metrics.Ganglia as G
+import qualified Network.Metric.Sink.Ganglia as G
 
 data Options = Options
     { optHost  :: String

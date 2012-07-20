@@ -34,7 +34,6 @@ module Network.Metric.Sink.Ganglia (
     , Metric(..)
     ) where
 
-import Control.Monad            (liftM)
 import Data.Binary.Put
 import Data.Bits                ((.&.))
 import Data.Char                (toLower)
@@ -109,7 +108,7 @@ defaultMetric = GangliaMetric
 
 -- | Open a new Ganglia sink
 open :: String -> String -> IO MetricSink
-open host port = liftM (MetricSink . Ganglia) (hOpen Datagram host port)
+open = fOpen Ganglia Datagram
 
 -- | Encode a GangliaMetric's metadata into a Binary.Put monad
 --
@@ -150,9 +149,9 @@ put :: Encodable a
     -> a
     -> Slope
     -> BL.ByteString
-put group bucket value slope =
-     BL.concat $ map runPut [putMetaData metric, putValue metric]
+put group bucket value slope = BL.concat $ map run [putMetaData, putValue]
   where
+     run f  = runPut $ f metric
      metric = defaultMetric
          { name  = bucket
          , group = group
@@ -160,6 +159,17 @@ put group bucket value slope =
          , type' = determineType value
          , slope = slope
          }
+
+-- | TODO: more horror
+determineType :: Typeable a => a -> GangliaType
+determineType t = case show $ typeOf t of
+    "Int16"   -> Int16
+    "Int"     -> Int32
+    "Integer" -> Int32
+    "Int32"   -> Int32
+    "Float"   -> Float
+    "Double"  -> Double
+    _         -> String
 
 -- | Common headers for the metadata and value
 putHeader :: Int32 -> GangliaMetric -> Put
@@ -199,14 +209,3 @@ putString bstr = do
 
 putType :: GangliaType -> Put
 putType = putString . BS.pack . map toLower . show
-
--- | TODO: more horror
-determineType :: Typeable a => a -> GangliaType
-determineType t = case show $ typeOf t of
-    "Int16"   -> Int16
-    "Int"     -> Int32
-    "Integer" -> Int32
-    "Int32"   -> Int32
-    "Float"   -> Float
-    "Double"  -> Double
-    _         -> String

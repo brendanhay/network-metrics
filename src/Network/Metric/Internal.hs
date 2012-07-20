@@ -24,14 +24,18 @@ module Network.Metric.Internal (
     , Encodable(..)
     , Sink(..)
 
+    -- * General Functions
+    , key
+
     -- * Socket Handle Functions
+    , fOpen
     , hOpen
     , hClose
     , hPush
     ) where
 
 import Data.Typeable                  (Typeable)
-import Control.Monad                  (unless, void)
+import Control.Monad                  (liftM, unless, void)
 import Network.Socket                 hiding (send)
 import Network.Socket.ByteString.Lazy (send)
 
@@ -91,6 +95,13 @@ instance Sink MetricSink where
 --
 -- API
 --
+
+key :: Group -> Bucket -> BS.ByteString
+key g b = BS.concat [g, ".", b]
+
+-- | Helper to curry a constructor function for a sink
+fOpen :: Sink a => (Handle -> a) -> SocketType -> String -> String -> IO MetricSink
+fOpen ctor typ = \host port -> liftM (MetricSink . ctor) (hOpen typ host port)
 
 -- | Create a new socket handle (in a disconnected state) for UDP communication
 hOpen :: SocketType -> String -> String -> IO Handle

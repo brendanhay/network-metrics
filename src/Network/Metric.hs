@@ -22,15 +22,15 @@ module Network.Metric (
     , Group
     , Bucket
     , Metric(..)
-    , MetricSink(..)
     ) where
 
 import Data.Data               (Data, Typeable)
 import Network.Metric.Internal
 
-import qualified Network.Metric.Sink.Ganglia  as GA
-import qualified Network.Metric.Sink.Graphite as GR
-import qualified Network.Metric.Sink.Statsd   as S
+import qualified Network.Metric.Sink.Ganglia  as GangliaSink
+import qualified Network.Metric.Sink.Graphite as GraphiteSink
+import qualified Network.Metric.Sink.Statsd   as StatsdSink
+import qualified Network.Metric.Sink.Stdout   as StdoutSink
 
 -- | An enumeration of supplied sink types
 data SinkType =
@@ -40,20 +40,13 @@ data SinkType =
     | Stdout
       deriving (Data, Typeable, Show)
 
--- | A handle to a stdout sink
-data StdoutSink = StdoutSink deriving (Show)
-
-instance Sink StdoutSink where
-    push  _ = print
-    close _ = return ()
-
 --
 -- API
 --
 
 -- | Open a new sink specified by SinkType
 open :: SinkType -> String -> String -> IO MetricSink
-open Ganglia  = GA.open
-open Graphite = GR.open
-open Statsd   = S.open
-open Stdout   = \_ _ -> return $ MetricSink StdoutSink
+open Ganglia  = GangliaSink.open
+open Graphite = GraphiteSink.open
+open Statsd   = StatsdSink.open
+open Stdout   = StdoutSink.open
