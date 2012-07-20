@@ -96,6 +96,7 @@ instance Sink MetricSink where
 -- API
 --
 
+-- | Combine a Group and Bucket into a single key
 key :: Group -> Bucket -> BS.ByteString
 key g b = BS.concat [g, ".", b]
 
