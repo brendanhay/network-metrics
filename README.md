@@ -1,5 +1,5 @@
-Network.Metrics
-===============
+Network.Metric
+==============
 
 Table of Contents
 -----------------
@@ -16,16 +16,15 @@ Table of Contents
 Usage
 -----
 
-All modules including `Network.Metrics` expose the same interfaces to sinks, and re-export
+All modules including `Network.Metric` expose the same interfaces to sinks, and re-export
 the required types for constructing metrics.
 
 Supported Sinks:
 
-* `Network.Metrics.Ganglia`
-* `Network.Metrics.Graphite`
-* `Network.Metrics.Statsd`
-
-> A `stdout` sink is available in the top-level `Network.Metrics` module.
+* `Network.Metric.Sink.Ganglia`
+* `Network.Metric.Sink.Graphite`
+* `Network.Metric.Sink.Statsd`
+* `Network.Metric.Sink.Stdout`
 
 
 **Unified:**
@@ -33,7 +32,7 @@ Supported Sinks:
 ````haskell
 {-# LANGUAGE OverloadedStrings #-}
 
-import Network.Metrics
+import Network.Metric
 
 main = do
     sink <- open Ganglia "localhost" "1234"
@@ -48,7 +47,7 @@ main = do
 ````haskell
 {-# LANGUAGE OverloadedStrings #-}
 
-import Network.Metrics.Graphite
+import Network.Metric.Sink.Graphite
 
 main = do
     sink <- open "localhost" "1234"
@@ -65,7 +64,7 @@ API
 
 Preliminary API documentation is available [on Hackage](http://hackage.haskell.org/package/network-metrics).
 
-> The API is currently in flux, and conversion between the universal `Counter`, `Gauge`, and `Timing` ctors to the respective sink types is not completed.
+> The API is currently in flux, and conversion between the universal `Counter`, `Gauge`, and `Timing` ctors to the respective sink types is not yet completed.
 
 
 <a name="gmetric" />
