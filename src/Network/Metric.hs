@@ -16,12 +16,13 @@ module Network.Metric (
 
     -- * Sink Functions
     , open
-    , Sink(push, close)
+    , Sink(push, mpush, close)
 
     -- * Re-exports
     , Group
     , Bucket
     , Metric(..)
+    , MetricSink
     ) where
 
 import Data.Data               (Data, Typeable)

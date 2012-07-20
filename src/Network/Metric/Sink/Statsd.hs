@@ -13,7 +13,7 @@
 module Network.Metric.Sink.Statsd (
     -- * Sink Functions
       open
-    , Sink(push, close)
+    , Sink(push, mpush, close)
 
     -- * Re-exports
     , Group
