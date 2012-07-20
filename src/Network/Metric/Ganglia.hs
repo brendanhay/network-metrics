@@ -1,5 +1,5 @@
 -- |
--- Module      : Network.Metrics.Ganglia
+-- Module      : Network.Metric.Ganglia
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metrics.Ganglia (
+module Network.Metric.Ganglia (
     -- * Exported Types
       Slope(..)
     , GangliaType(..)
@@ -44,7 +44,7 @@ import Data.Int                 (Int32)
 import Data.Typeable            (Typeable, typeOf)
 import Data.Word                (Word32)
 import Network.Socket           (SocketType(..))
-import Network.Metrics.Internal
+import Network.Metric.Internal
 
 import qualified Data.ByteString            as B
 import qualified Data.ByteString.Char8      as BS

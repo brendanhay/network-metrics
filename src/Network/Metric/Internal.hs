@@ -1,7 +1,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 
 -- |
--- Module      : Network.Metrics.Internal
+-- Module      : Network.Metric.Internal
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -12,7 +12,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metrics.Internal (
+module Network.Metric.Internal (
     -- * Exported Types
       Handle(..)
     , Group

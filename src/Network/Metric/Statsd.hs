@@ -1,5 +1,5 @@
 -- |
--- Module      : Network.Metrics.Statsd
+-- Module      : Network.Metric.Statsd
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metrics.Statsd (
+module Network.Metric.Statsd (
     -- * Sink Functions
       open
     , Sink(push, close)
@@ -24,7 +24,7 @@ module Network.Metrics.Statsd (
 import Control.Monad            (liftM)
 import Network.Socket           (SocketType(..))
 import System.Random            (randomRIO)
-import Network.Metrics.Internal
+import Network.Metric.Internal
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL

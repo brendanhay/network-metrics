@@ -1,5 +1,5 @@
 -- |
--- Module      : Network.Metrics
+-- Module      : Network.Metric
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,7 +10,7 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metrics (
+module Network.Metric (
     -- * Exported Types
       SinkType(..)
 
@@ -26,11 +26,11 @@ module Network.Metrics (
     ) where
 
 import Data.Data                (Data, Typeable)
-import Network.Metrics.Internal
+import Network.Metric.Internal
 
-import qualified Network.Metrics.Ganglia  as GA
-import qualified Network.Metrics.Graphite as GR
-import qualified Network.Metrics.Statsd   as S
+import qualified Network.Metric.Ganglia  as GA
+import qualified Network.Metric.Graphite as GR
+import qualified Network.Metric.Statsd   as S
 
 -- | An enumeration of supplied sink types
 data SinkType =
