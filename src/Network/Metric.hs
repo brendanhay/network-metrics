@@ -14,16 +14,17 @@ module Network.Metric (
     -- * Exported Types
       SinkType(..)
 
-    -- * Sink Functions
-    , open
-    , Sink(..)
-
     -- * Re-exports
     , Group
     , Bucket
     , Metric(..)
-    , AnySink
+    , Measurable(..)
     , Encodable(..)
+    , Sink(..)
+    , AnyMeasurable(..)
+    , AnySink(..)
+    , open
+    , pack
     ) where
 
 import Data.Data               (Data, Typeable)
