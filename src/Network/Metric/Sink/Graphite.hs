@@ -12,18 +12,18 @@
 
 module Network.Metric.Sink.Graphite (
     -- * Sink Functions
-      open
-    , Sink(..)
+      Sink(..)
+    , open
 
     -- * Re-exports
     , Group
     , Bucket
     , Metric(..)
+    , pack
     ) where
 
-import Control.Monad           (liftM)
+import Data.Time.Clock.POSIX   (POSIXTime, getPOSIXTime)
 import Network.Socket          (SocketType(..))
-import Data.Time.Clock.POSIX   (getPOSIXTime)
 import Network.Metric.Internal
 
 import qualified Data.ByteString.Char8      as BS
@@ -33,11 +33,13 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 data Graphite = Graphite Handle deriving (Show)
 
 instance Sink Graphite where
-    push  (Graphite h) m = enc m >>= hPush h
+    push (Graphite h) m = do
+        time <- getPOSIXTime
+        mapM_ (hPush h . enc time) (measure m)
       where
-        enc (Counter g b v) = put g b v
-        enc (Timer g b v)   = put g b v
-        enc (Gauge g b v)   = put g b v
+        enc t (Counter g b v) = put g b v t
+        enc t (Timer g b v)   = put g b v t
+        enc t (Gauge g b v)   = put g b v t
 
     close (Graphite h) = hClose h
 
@@ -46,7 +48,7 @@ instance Sink Graphite where
 --
 
 -- | Open a new Graphite sink
-open :: String -> String -> IO MetricSink
+open :: String -> String -> IO AnySink
 open = fOpen Graphite Stream
 
 --
@@ -54,9 +56,9 @@ open = fOpen Graphite Stream
 --
 
 -- | Encode a metric into the Graphite format
-put :: Encodable a => Group -> Bucket -> a -> IO BL.ByteString
-put group bucket value = liftM bstr getPOSIXTime
+put :: Encodable a => Group -> Bucket -> a -> POSIXTime -> BL.ByteString
+put group bucket value time =
+    BL.fromChunks [key group bucket, encode value, timestamp]
   where
-    timestamp n = BS.pack $ show (truncate n :: Integer)
-    bstr n      = BL.fromChunks [key group bucket, encode value, timestamp n]
+    timestamp = BS.pack $ show (truncate time :: Integer)
 

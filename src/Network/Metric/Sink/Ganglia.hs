@@ -25,13 +25,14 @@ module Network.Metric.Sink.Ganglia (
     , putValue
 
     -- * Sink Functions
-    , open
     , Sink(..)
+    , open
 
     -- * Re-exports
     , Group
     , Bucket
     , Metric(..)
+    , pack
     ) where
 
 import Data.Binary.Put
@@ -79,7 +80,7 @@ instance Default GangliaMetric where
 data Ganglia = Ganglia Handle deriving (Show)
 
 instance Sink Ganglia where
-    push  (Ganglia h) = hPush h . enc
+    push (Ganglia h) = mapM_ (hPush h . enc) . measure
       where
         enc (Counter g b v) = put g b v Positive
         enc (Timer g b v)   = put g b v Both
@@ -107,7 +108,7 @@ defaultMetric = GangliaMetric
     }
 
 -- | Open a new Ganglia sink
-open :: String -> String -> IO MetricSink
+open :: String -> String -> IO AnySink
 open = fOpen Ganglia Datagram
 
 -- | Encode a GangliaMetric's metadata into a Binary.Put monad
@@ -159,6 +160,7 @@ put group bucket value slope = BL.concat $ map run [putMetaData, putValue]
          , type' = determineType value
          , slope = slope
          }
+
 
 -- | TODO: more horror
 determineType :: Typeable a => a -> GangliaType

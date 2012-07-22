@@ -18,13 +18,18 @@ module Network.Metric.Internal (
     , Group
     , Bucket
     , Metric(..)
-    , MetricSink(..)
+
+    -- * Existential Types
+    , AnyMeasurable(..)
+    , AnySink(..)
 
     -- * Exported Type Classes
+    , Measurable(..)
     , Encodable(..)
     , Sink(..)
 
     -- * General Functions
+    , pack
     , key
 
     -- * Socket Handle Functions
@@ -34,10 +39,11 @@ module Network.Metric.Internal (
     , hPush
     ) where
 
+import Control.Monad                  (liftM, unless)
 import Data.Typeable                  (Typeable)
-import Control.Monad                  (liftM, unless, void)
 import Network.Socket                 hiding (send)
 import Network.Socket.ByteString.Lazy (send)
+import Text.Printf                    (printf)
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
@@ -51,16 +57,52 @@ type Group = BS.ByteString
 -- | Metric bucket
 type Bucket = BS.ByteString
 
-data Metric a =
-      Counter Group Bucket Int
+data Metric
+    = Counter Group Bucket Int
     | Timer Group Bucket Double
-    | Gauge Group Bucket a
+    | Gauge Group Bucket Double
       deriving (Show)
 
--- | A Metric's value
+--
+-- Type Classes
+--
+
+-- | Item to measure for metrics
+class Measurable a where
+    -- | Convert a measurable instance into a list of metrics
+    measure :: a -> [Metric]
+
+-- | Metric value to be encoded
 class (Show a, Typeable a) => Encodable a where
     -- | Encode the value as a bytestring
     encode :: a -> BS.ByteString
+
+-- | Sink resource to write metrics to
+class Sink a where
+    -- | Write a metric to the sink.
+    push  :: Measurable b => a -> b -> IO ()
+    -- | Close the sink - subsequent writes will throw an error.
+    close :: a -> IO ()
+
+--
+-- Existential Types
+--
+
+-- | Any instance of the Measurable type class
+data AnyMeasurable = forall a. Measurable a => AnyMeasurable a
+
+-- | Any instance of the Sink type class
+data AnySink = forall a. Sink a => AnySink a
+
+--
+-- Instances
+--
+
+instance Measurable AnyMeasurable where
+    measure (AnyMeasurable m) = measure m
+
+instance Measurable Metric where
+    measure = flip (:) [] . id
 
 instance Encodable Int where
     encode = BS.pack . show
@@ -69,43 +111,31 @@ instance Encodable Integer where
     encode = BS.pack . show
 
 instance Encodable Double where
-    encode = BS.pack . show
+    encode = BS.pack . printf "%.8f"
 
 instance Encodable String where
     encode = BS.pack
 
--- | Sink resource to write metrics to
-class Sink a where
-    -- | Write a metric to the sink.
-    push  :: Encodable b => a -> Metric b -> IO ()
-
-    -- | Close the sink - subsequent writes will throw an error.
-    close :: a -> IO ()
-
-    -- | Effeciently write multiple metrics simultaneously.
-    mpush :: Encodable b => a -> [Metric b] -> IO ()
-    mpush s = void . mapM (push s)
-
--- | Existential sink type
-data MetricSink = forall a. Sink a => MetricSink a
-
 -- | Existential sink instance
-instance Sink MetricSink where
-    push  (MetricSink s) = push s
-    mpush (MetricSink s) = mpush s
-    close (MetricSink s) = close s
+instance Sink AnySink where
+    push  (AnySink s) = push s
+    close (AnySink s) = close s
 
 --
 -- API
 --
+
+-- | Pack instances of Measurable into an existential type
+pack :: Measurable a => a -> AnyMeasurable
+pack = AnyMeasurable
 
 -- | Combine a Group and Bucket into a single key
 key :: Group -> Bucket -> BS.ByteString
 key g b = BS.concat [g, ".", b]
 
 -- | Helper to curry a constructor function for a sink
-fOpen :: Sink a => (Handle -> a) -> SocketType -> String -> String -> IO MetricSink
-fOpen ctor typ = \host port -> liftM (MetricSink . ctor) (hOpen typ host port)
+fOpen :: Sink a => (Handle -> a) -> SocketType -> String -> String -> IO AnySink
+fOpen ctor typ host port = liftM (AnySink . ctor) (hOpen typ host port)
 
 -- | Create a new socket handle (in a disconnected state) for UDP communication
 hOpen :: SocketType -> String -> String -> IO Handle

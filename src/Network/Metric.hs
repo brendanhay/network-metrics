@@ -22,7 +22,7 @@ module Network.Metric (
     , Group
     , Bucket
     , Metric(..)
-    , MetricSink
+    , AnySink
     , Encodable(..)
     ) where
 
@@ -47,7 +47,7 @@ data SinkType =
 --
 
 -- | Open a new sink specified by SinkType
-open :: SinkType -> String -> String -> IO MetricSink
+open :: SinkType -> String -> String -> IO AnySink
 open Ganglia  = GangliaSink.open
 open Graphite = GraphiteSink.open
 open Statsd   = StatsdSink.open

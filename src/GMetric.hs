@@ -17,13 +17,13 @@ module Main (
 
 import Control.Monad            (liftM, when)
 import Data.Binary.Put          (runPut)
-import Data.ByteString.Char8    (pack)
 import Network.Socket           (SocketType(..))
 import System.Console.CmdArgs
 import System.Environment       (getArgs, withArgs)
 import System.Exit              (ExitCode(..), exitWith)
 import Network.Metric.Internal
 
+import qualified Data.ByteString.Char8       as BS
 import qualified Network.Metric.Sink.Ganglia as G
 
 data Options = Options
@@ -60,13 +60,13 @@ emit Options{..} = do
   where
     push' f = flip hPush . runPut $ f metric
     metric  = G.GangliaMetric
-        (pack optName)
+        (BS.pack optName)
         optType
-        (pack optUnits)
-        (pack optValue)
+        (BS.pack optUnits)
+        (BS.pack optValue)
         ""
-        (pack optSpoof)
-        (pack optGroup)
+        (BS.pack optSpoof)
+        (BS.pack optGroup)
         optSlope
         (fromInteger optTMax)
         (fromInteger optDMax)

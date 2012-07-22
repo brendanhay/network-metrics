@@ -27,7 +27,7 @@ import Network.Metric.Internal
 data StdoutSink = StdoutSink deriving (Show)
 
 instance Sink StdoutSink where
-    push  _ = print
+    push  _ = print . measure
     close _ = return ()
 
 --
@@ -35,5 +35,5 @@ instance Sink StdoutSink where
 --
 
 -- | Open a new Stdout sink
-open :: String -> String -> IO MetricSink
-open _ _ = return $ MetricSink StdoutSink
+open :: String -> String -> IO AnySink
+open _ _ = return $ AnySink StdoutSink

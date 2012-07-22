@@ -12,13 +12,14 @@
 
 module Network.Metric.Sink.Statsd (
     -- * Sink Functions
-      open
-    , Sink(..)
+      Sink(..)
+    , open
 
     -- * Re-exports
     , Group
     , Bucket
-    , MetricSink(..)
+    , AnySink(..)
+    , pack
     ) where
 
 import Control.Monad            (liftM)
@@ -36,7 +37,7 @@ data Sampled = Sampled | Exact | Ignore
 data Statsd = Statsd Handle deriving (Show)
 
 instance Sink Statsd where
-    push  (Statsd h) m  = enc m >>= hPush h
+    push (Statsd h) m = mapM enc (measure m) >>= mapM_ (hPush h)
       where
         enc (Counter g b v) = put g b v "c" 1.0
         enc (Gauge g b v)   = put g b v "g" 1.0
@@ -49,7 +50,7 @@ instance Sink Statsd where
 --
 
 -- | Open a new Statsd sink
-open :: String -> String -> IO MetricSink
+open :: String -> String -> IO AnySink
 open = fOpen Statsd Datagram
 
 --
