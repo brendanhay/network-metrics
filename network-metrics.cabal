@@ -1,5 +1,5 @@
 name:               network-metrics
-version:            0.1.7
+version:            0.1.8
 synopsis:           Send metrics to Ganglia, Graphite, and statsd.
 license:            OtherLicense
 license-file:       LICENSE
@@ -46,7 +46,7 @@ library
                   , TypeSynonymInstances
                   , FlexibleInstances
 
-  ghc-options:      -Wall -O2 -rtsopts
+  ghc-options:      -Wall -rtsopts
   ghc-prof-options: -prof -auto-all
 
   build-depends:    base >= 4.3 && < 5
@@ -70,7 +70,7 @@ executable gmetric-haskell
                   , TypeSynonymInstances
                   , FlexibleInstances
 
-  ghc-options:      -Wall -O2 -threaded -rtsopts
+  ghc-options:      -Wall -rtsopts
   ghc-prof-options: -prof -auto-all -with-rtsopts=-p
 
   build-depends:    base >= 4.3 && < 5
