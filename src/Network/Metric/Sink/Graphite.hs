@@ -19,7 +19,9 @@ module Network.Metric.Sink.Graphite (
     , Group
     , Bucket
     , Metric(..)
-    , pack
+    , counter
+    , timer
+    , gauge
     ) where
 
 import Data.Time.Clock.POSIX   (POSIXTime, getPOSIXTime)
@@ -30,35 +32,41 @@ import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 -- | A handle to a Graphite sink
-data Graphite = Graphite Handle deriving (Show)
+data Graphite = Graphite Host Handle deriving (Show)
 
 instance Sink Graphite where
-    push (Graphite h) m = do
+    push (Graphite host hd) m = do
         time <- getPOSIXTime
-        mapM_ (hPush h . enc time) (measure m)
+        mapM_ (hPush hd . enc time) (measure m)
       where
-        enc t (Counter g b v) = put g b v t
-        enc t (Timer g b v)   = put g b v t
-        enc t (Gauge g b v)   = put g b v t
+        enc t (Counter g b v) = put host g b v t
+        enc t (Timer g b v)   = put host g b v t
+        enc t (Gauge g b v)   = put host g b v t
 
-    close (Graphite h) = hClose h
+    close (Graphite _ hd) = hClose hd
 
 --
 -- API
 --
 
 -- | Open a new Graphite sink
-open :: String -> String -> IO AnySink
-open = fOpen Graphite Stream
+open :: Host -> HostName -> PortNumber -> IO AnySink
+open host = fOpen (Graphite host) Stream
 
 --
 -- Private
 --
 
 -- | Encode a metric into the Graphite format
-put :: Encodable a => Group -> Bucket -> a -> POSIXTime -> BL.ByteString
-put group bucket value time =
-    BL.fromChunks [key group bucket, encode value, timestamp]
+put :: Encodable a
+    => Host
+    -> Group
+    -> Bucket
+    -> a
+    -> POSIXTime
+    -> BL.ByteString
+put host group bucket value time =
+    BL.fromChunks [key host group bucket, encode value, timestamp]
   where
     timestamp = BS.pack $ show (truncate time :: Integer)
 

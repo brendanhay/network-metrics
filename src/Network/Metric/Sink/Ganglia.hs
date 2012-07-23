@@ -32,7 +32,9 @@ module Network.Metric.Sink.Ganglia (
     , Group
     , Bucket
     , Metric(..)
-    , pack
+    , counter
+    , timer
+    , gauge
     ) where
 
 import Data.Binary.Put
@@ -61,13 +63,13 @@ data GangliaType = String | Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Flo
 
 -- | Concrete metric type used to emit metadata and value packets
 data GangliaMetric = GangliaMetric
-    { name  :: BS.ByteString
+    { name  :: Bucket
     , type' :: GangliaType
     , units :: BS.ByteString
     , value :: BS.ByteString
     , host  :: BS.ByteString
     , spoof :: BS.ByteString
-    , group :: BS.ByteString
+    , group :: Group
     , slope :: Slope
     , tmax  :: Word32
     , dmax  :: Word32
@@ -77,16 +79,16 @@ instance Default GangliaMetric where
     def = defaultMetric
 
 -- | A handle to a Ganglia sink
-data Ganglia = Ganglia Handle deriving (Show)
+data Ganglia = Ganglia Host Handle deriving (Show)
 
 instance Sink Ganglia where
-    push (Ganglia h) = mapM_ (hPush h . enc) . measure
+    push (Ganglia host hd) = mapM_ (hPush hd . enc) . measure
       where
-        enc (Counter g b v) = put g b v Positive
-        enc (Timer g b v)   = put g b v Both
-        enc (Gauge g b v)   = put g b v Both
+        enc (Counter g b v) = put host g b v Positive
+        enc (Timer g b v)   = put host g b v Both
+        enc (Gauge g b v)   = put host g b v Both
 
-    close (Ganglia h) = hClose h
+    close (Ganglia _ hd) = hClose hd
 
 --
 -- API
@@ -108,8 +110,8 @@ defaultMetric = GangliaMetric
     }
 
 -- | Open a new Ganglia sink
-open :: String -> String -> IO AnySink
-open = fOpen Ganglia Datagram
+open :: Host -> HostName -> PortNumber -> IO AnySink
+open host = fOpen (Ganglia host) Datagram
 
 -- | Encode a GangliaMetric's metadata into a Binary.Put monad
 --
@@ -145,26 +147,28 @@ bufferSize = 1500
 
 -- | Oh, the horror
 put :: Encodable a
-    => Group
+    => Host
+    -> Group
     -> Bucket
     -> a
     -> Slope
     -> BL.ByteString
-put group bucket value slope = BL.concat $ map run [putMetaData, putValue]
+put host group bucket value slope =
+    BL.concat $ map run [putMetaData, putValue]
   where
      run f  = runPut $ f metric
      metric = defaultMetric
          { name  = bucket
          , group = group
+         , host  = host
          , value = encode value
          , type' = determineType value
          , slope = slope
          }
 
-
 -- | TODO: more horror
 determineType :: Typeable a => a -> GangliaType
-determineType t = case show $ typeOf t of
+determineType value = case show $ typeOf value of
     "Int16"   -> Int16
     "Int"     -> Int32
     "Integer" -> Int32

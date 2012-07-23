@@ -19,7 +19,9 @@ module Network.Metric.Sink.Statsd (
     , Group
     , Bucket
     , AnySink(..)
-    , pack
+    , counter
+    , timer
+    , gauge
     ) where
 
 import Control.Monad            (liftM)
@@ -34,24 +36,24 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 data Sampled = Sampled | Exact | Ignore
 
 -- | A handle to a Statsd sink
-data Statsd = Statsd Handle deriving (Show)
+data Statsd = Statsd Host Handle deriving (Show)
 
 instance Sink Statsd where
-    push (Statsd h) m = mapM enc (measure m) >>= mapM_ (hPush h)
+    push (Statsd host hd) m = mapM enc (measure m) >>= mapM_ (hPush hd)
       where
-        enc (Counter g b v) = put g b v "c" 1.0
-        enc (Gauge g b v)   = put g b v "g" 1.0
-        enc (Timer g b v)   = put g b v "ms" 1.0
+        enc (Counter g b v) = put host g b v "c" 1.0
+        enc (Gauge g b v)   = put host g b v "g" 1.0
+        enc (Timer g b v)   = put host g b v "ms" 1.0
 
-    close (Statsd h) = hClose h
+    close (Statsd _ hd) = hClose hd
 
 --
 -- API
 --
 
 -- | Open a new Statsd sink
-open :: String -> String -> IO AnySink
-open = fOpen Statsd Datagram
+open :: Host -> HostName -> PortNumber -> IO AnySink
+open host = fOpen (Statsd host) Datagram
 
 --
 -- Private
@@ -59,15 +61,17 @@ open = fOpen Statsd Datagram
 -- | Encode a metric into the Statsd format
 -- *TODO:* Currently statsd sampling is not exposed via the global metric type
 put :: Encodable a
-    => Group
+    => Host
+    -> Group
     -> Bucket
     -> a
     -> BS.ByteString
     -> Double
     -> IO BL.ByteString
-put group bucket value typ rate = liftM bstr (randomRIO (0.0, 1.0))
+put host group bucket value typ rate =
+    liftM bstr (randomRIO (0.0, 1.0))
   where
-    base   = [key group bucket, ":", encode value, "|", typ]
+    base   = [key host group bucket, ":", encode value, "|", typ]
     bstr n = BL.fromChunks $ case sample rate n of
         Sampled -> base ++ ["@", BS.pack $ show rate]
         Exact   -> base

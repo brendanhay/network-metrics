@@ -19,15 +19,25 @@ module Network.Metric.Sink.Stdout (
     , Group
     , Bucket
     , Metric(..)
+    , counter
+    , timer
+    , gauge
     ) where
 
 import Network.Metric.Internal
 
--- | A handle to a stdout sink
-data StdoutSink = StdoutSink deriving (Show)
+import qualified Data.ByteString.Char8 as BS
 
-instance Sink StdoutSink where
-    push  _ = print . measure
+-- | A handle to a stdout sink
+data Stdout = Stdout Host deriving (Show)
+
+instance Sink Stdout where
+    push (Stdout host) = mapM_ enc . measure
+      where
+        enc (Counter g b v) = put "Counter" host g b v
+        enc (Timer g b v)   = put "Timer" host g b v
+        enc (Gauge g b v)   = put "Gauge" host g b v
+
     close _ = return ()
 
 --
@@ -35,5 +45,14 @@ instance Sink StdoutSink where
 --
 
 -- | Open a new Stdout sink
-open :: String -> String -> IO AnySink
-open _ _ = return $ AnySink StdoutSink
+open :: Host -> HostName -> PortNumber -> IO AnySink
+open host _ _ = return . AnySink $ Stdout host
+
+--
+-- Private
+--
+
+put :: Encodable a => BS.ByteString -> Host -> Group -> Bucket -> a -> IO ()
+put prefix host group bucket value = putStrLn s
+  where
+    s = BS.unpack $ BS.concat [prefix, ": ", key host group bucket, " ", encode value]

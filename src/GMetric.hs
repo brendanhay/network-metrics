@@ -17,6 +17,7 @@ module Main (
 
 import Control.Monad            (liftM, when)
 import Data.Binary.Put          (runPut)
+import Data.Word                (Word16)
 import Network.Socket           (SocketType(..))
 import System.Console.CmdArgs
 import System.Environment       (getArgs, withArgs)
@@ -52,24 +53,25 @@ main = parse >>= emit
 --
 
 emit :: Options -> IO ()
-emit Options{..} = do
-    sink@(G.Ganglia hd) <- liftM G.Ganglia (hOpen Datagram optHost optPort)
-    _ <- push' G.putMetaData hd
-    _ <- push' G.putValue hd
-    G.close sink
-  where
-    push' f = flip hPush . runPut $ f metric
-    metric  = G.GangliaMetric
-        (BS.pack optName)
-        optType
-        (BS.pack optUnits)
-        (BS.pack optValue)
-        ""
-        (BS.pack optSpoof)
-        (BS.pack optGroup)
-        optSlope
-        (fromInteger optTMax)
-        (fromInteger optDMax)
+emit Options{..} = return ()
+  --   sink@(G.Ganglia hd) <- liftM G.Ganglia (hOpen Datagram optHost port)
+  --   _ <- push' G.putMetaData hd
+  --   _ <- push' G.putValue hd
+  --   G.close sink
+  -- where
+  --   push' f = flip hPush . runPut $ f metric
+  --   port    = PortNum (read optPort :: Word16)
+  --   metric  = G.GangliaMetric
+  --       (BS.pack optName)
+  --       optType
+  --       (BS.pack optUnits)
+  --       (BS.pack optValue)
+  --       ""
+  --       (BS.pack optSpoof)
+  --       (BS.pack optGroup)
+  --       optSlope
+  --       (fromInteger optTMax)
+  --       (fromInteger optDMax)
 
 --
 -- Parsing

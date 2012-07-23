@@ -15,6 +15,7 @@
 module Network.Metric.Internal (
     -- * Exported Types
       Handle(..)
+    , Host
     , Group
     , Bucket
     , Metric(..)
@@ -29,7 +30,9 @@ module Network.Metric.Internal (
     , Sink(..)
 
     -- * General Functions
-    , pack
+    , counter
+    , timer
+    , gauge
     , key
 
     -- * Socket Handle Functions
@@ -37,6 +40,10 @@ module Network.Metric.Internal (
     , hOpen
     , hClose
     , hPush
+
+    -- * Re-exports
+    , HostName
+    , PortNumber(..)
     ) where
 
 import Control.Monad                  (liftM, unless)
@@ -51,6 +58,9 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 -- | Socket handle
 data Handle = Handle Socket SockAddr deriving (Show)
 
+-- | Metric host
+type Host = BS.ByteString
+
 -- | Metric group
 type Group = BS.ByteString
 
@@ -58,7 +68,7 @@ type Group = BS.ByteString
 type Bucket = BS.ByteString
 
 data Metric
-    = Counter Group Bucket Int
+    = Counter Group Bucket Integer
     | Timer Group Bucket Double
     | Gauge Group Bucket Double
       deriving (Show)
@@ -67,9 +77,9 @@ data Metric
 -- Type Classes
 --
 
--- | Item to measure for metrics
+-- | Measure a type for metrics
 class Measurable a where
-    -- | Convert a measurable instance into a list of metrics
+    -- | Convert a measurable instance from a host into a list of metrics
     measure :: a -> [Metric]
 
 -- | Metric value to be encoded
@@ -125,22 +135,32 @@ instance Sink AnySink where
 -- API
 --
 
--- | Pack instances of Measurable into an existential type
-pack :: Measurable a => a -> AnyMeasurable
-pack = AnyMeasurable
+counter :: Group -> Bucket -> BS.ByteString -> Integer -> Metric
+counter g b e v = Counter g (bucket b e) v
 
--- | Combine a Group and Bucket into a single key
-key :: Group -> Bucket -> BS.ByteString
-key g b = BS.concat [g, ".", b]
+timer :: Group -> Bucket -> BS.ByteString -> Double -> Metric
+timer g b e v = Timer g (bucket b e) v
+
+gauge :: Group -> Bucket -> BS.ByteString -> Double -> Metric
+gauge g b e v = Gauge g (bucket b e) v
+
+-- | Combine a Host, Group and Bucket into a single key
+key :: Host -> Group -> Bucket -> BS.ByteString
+key h g b = BS.intercalate "." [h, g, b]
 
 -- | Helper to curry a constructor function for a sink
-fOpen :: Sink a => (Handle -> a) -> SocketType -> String -> String -> IO AnySink
+fOpen :: Sink a
+      => (Handle -> a)
+      -> SocketType
+      -> HostName
+      -> PortNumber
+      -> IO AnySink
 fOpen ctor typ host port = liftM (AnySink . ctor) (hOpen typ host port)
 
 -- | Create a new socket handle (in a disconnected state) for UDP communication
-hOpen :: SocketType -> String -> String -> IO Handle
-hOpen typ host port = do
-    (addr:_) <- getAddrInfo Nothing (Just host) (Just port)
+hOpen :: SocketType -> HostName -> PortNumber -> IO Handle
+hOpen typ host (PortNum port) = do
+    (addr:_) <- getAddrInfo Nothing (Just host) (Just $ show port)
     sock     <- socket (addrFamily addr) typ defaultProtocol
     return $ Handle sock (addrAddress addr)
 
@@ -155,3 +175,10 @@ hPush (Handle sock addr) bstr | BL.null bstr = return ()
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- send sock bstr
     return ()
+
+--
+-- Private
+--
+
+bucket :: Bucket -> BS.ByteString -> BS.ByteString
+bucket b e = BS.concat [b, ".", e]
