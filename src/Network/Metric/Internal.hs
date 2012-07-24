@@ -135,14 +135,14 @@ instance Sink AnySink where
 -- API
 --
 
-counter :: Group -> Bucket -> BS.ByteString -> Integer -> Metric
-counter g b e v = Counter g (bucket b e) v
+counter :: Group -> BS.ByteString -> Bucket -> Integer -> Metric
+counter g e b v = Counter g (bucket e b) v
 
-timer :: Group -> Bucket -> BS.ByteString -> Double -> Metric
-timer g b e v = Timer g (bucket b e) v
+timer :: Group -> BS.ByteString -> Bucket -> Double -> Metric
+timer g e b v = Timer g (bucket e b) v
 
-gauge :: Group -> Bucket -> BS.ByteString -> Double -> Metric
-gauge g b e v = Gauge g (bucket b e) v
+gauge :: Group -> BS.ByteString -> Bucket -> Double -> Metric
+gauge g b e v = Gauge g (bucket e b) v
 
 -- | Combine a Host, Group and Bucket into a single key
 key :: Host -> Group -> Bucket -> BS.ByteString
@@ -180,5 +180,5 @@ hPush (Handle sock addr) bstr | BL.null bstr = return ()
 -- Private
 --
 
-bucket :: Bucket -> BS.ByteString -> BS.ByteString
-bucket b e = BS.concat [b, ".", e]
+bucket :: BS.ByteString -> Bucket -> BS.ByteString
+bucket e b = BS.concat [e, ".", b]
