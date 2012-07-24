@@ -32,9 +32,6 @@ module Network.Metric.Sink.Ganglia (
     , Group
     , Bucket
     , Metric(..)
-    , counter
-    , timer
-    , gauge
     ) where
 
 import Data.Binary.Put

@@ -19,9 +19,6 @@ module Network.Metric.Sink.Graphite (
     , Group
     , Bucket
     , Metric(..)
-    , counter
-    , timer
-    , gauge
     ) where
 
 import Data.Time.Clock.POSIX   (POSIXTime, getPOSIXTime)

@@ -30,9 +30,6 @@ module Network.Metric.Internal (
     , Sink(..)
 
     -- * General Functions
-    , counter
-    , timer
-    , gauge
     , key
 
     -- * Socket Handle Functions
@@ -135,15 +132,6 @@ instance Sink AnySink where
 -- API
 --
 
-counter :: Group -> BS.ByteString -> Bucket -> Integer -> Metric
-counter g e b v = Counter g (bucket e b) v
-
-timer :: Group -> BS.ByteString -> Bucket -> Double -> Metric
-timer g e b v = Timer g (bucket e b) v
-
-gauge :: Group -> BS.ByteString -> Bucket -> Double -> Metric
-gauge g b e v = Gauge g (bucket e b) v
-
 -- | Combine a Host, Group and Bucket into a single key
 key :: Host -> Group -> Bucket -> BS.ByteString
 key h g b = BS.intercalate "." [h, g, b]
@@ -175,10 +163,3 @@ hPush (Handle sock addr) bstr | BL.null bstr = return ()
     sIsConnected sock >>= \b -> unless b $ connect sock addr
     _ <- send sock bstr
     return ()
-
---
--- Private
---
-
-bucket :: BS.ByteString -> Bucket -> BS.ByteString
-bucket e b = BS.concat [e, ".", b]

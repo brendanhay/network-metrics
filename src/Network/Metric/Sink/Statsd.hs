@@ -19,9 +19,6 @@ module Network.Metric.Sink.Statsd (
     , Group
     , Bucket
     , AnySink(..)
-    , counter
-    , timer
-    , gauge
     ) where
 
 import Control.Monad            (liftM)

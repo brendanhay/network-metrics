@@ -24,9 +24,6 @@ module Network.Metric (
     , AnyMeasurable(..)
     , AnySink(..)
     , open
-    , counter
-    , timer
-    , gauge
     ) where
 
 import Data.Data               (Data, Typeable)

@@ -19,9 +19,6 @@ module Network.Metric.Sink.Stdout (
     , Group
     , Bucket
     , Metric(..)
-    , counter
-    , timer
-    , gauge
     ) where
 
 import Network.Metric.Internal
