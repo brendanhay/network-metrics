@@ -27,7 +27,6 @@ source-repository head
   type:     git
   location: git://github.com/brendanhay/network-metrics.git
 
-
 library
   exposed-modules:  Network.Metric
                   , Network.Metric.Sink.Ganglia
