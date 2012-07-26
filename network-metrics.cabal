@@ -1,5 +1,5 @@
 name:               network-metrics
-version:            0.2.0
+version:            0.2.1
 synopsis:           Send metrics to Ganglia, Graphite, and statsd.
 license:            OtherLicense
 license-file:       LICENSE
