@@ -14,7 +14,7 @@ cabal-version:      >= 1.10
 
 description:
     .
-    Send metrics directly from Haskell various monitoring and metrics services.
+    Send metrics directly from Haskell to various monitoring and metrics services.
     .
     Supported services are Ganglia, Graphite, and statsd.
     .
