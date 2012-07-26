@@ -74,7 +74,7 @@ data Metric
 -- Type Classes
 --
 
--- | Measure a type for metrics
+-- | Measure a type for a collection of metrics
 class Measurable a where
     -- | Convert a measurable instance from a host into a list of metrics
     measure :: a -> [Metric]
