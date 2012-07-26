@@ -1,5 +1,5 @@
 -- |
--- Module      : Network.Metric.Sink.SinkHandle
+-- Module      : Network.Metric.Sink.Handle
 -- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
@@ -10,18 +10,15 @@
 -- Portability : non-portable (GHC extensions)
 --
 
-module Network.Metric.Sink.SinkHandle (
+module Network.Metric.Sink.Handle (
     -- * Exported Types
       SinkHandle(..)
-
-    -- * Sink Functions
-    , open
-    , Sink(..)
 
     -- * Re-exports
     , Group
     , Bucket
     , Metric(..)
+    , Sink(..)
     ) where
 
 import Network.Metric.Internal
@@ -39,16 +36,6 @@ instance Sink SinkHandle where
         enc (Gauge g b v)   = put "Gauge" h g b v
 
     close _ = return ()
-
---
--- API
---
-
--- | Open a new sink to stdout, conforming to the interface in Metric.hs
--- .
--- If you want to create a sink to a given handle fn, use the exported SinkHandle constructor
-open :: Host -> HostName -> PortNumber -> IO AnySink
-open host _ _ = return . AnySink $ SinkHandle host putStrLn
 
 --
 -- Private

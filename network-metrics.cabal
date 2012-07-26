@@ -32,7 +32,7 @@ library
                   , Network.Metric.Sink.Ganglia
                   , Network.Metric.Sink.Graphite
                   , Network.Metric.Sink.Statsd
-                  , Network.Metric.Sink.SinkHandle
+                  , Network.Metric.Sink.Handle
   other-modules:    Network.Metric.Internal
 
   hs-source-dirs:   src
