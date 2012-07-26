@@ -29,10 +29,10 @@ module Network.Metric (
 import Data.Data               (Data, Typeable)
 import Network.Metric.Internal
 
-import qualified Network.Metric.Sink.Ganglia  as GangliaSink
-import qualified Network.Metric.Sink.Graphite as GraphiteSink
-import qualified Network.Metric.Sink.Statsd   as StatsdSink
-import qualified Network.Metric.Sink.Stdout   as StdoutSink
+import qualified Network.Metric.Sink.Ganglia    as GangliaSink
+import qualified Network.Metric.Sink.Graphite   as GraphiteSink
+import qualified Network.Metric.Sink.Statsd     as StatsdSink
+import qualified Network.Metric.Sink.SinkHandle as HandleSink
 
 -- | An enumeration of supplied sink types
 data SinkType =
@@ -51,4 +51,4 @@ open :: SinkType -> Host -> HostName -> PortNumber -> IO AnySink
 open Ganglia  = GangliaSink.open
 open Graphite = GraphiteSink.open
 open Statsd   = StatsdSink.open
-open Stdout   = StdoutSink.open
+open Stdout   = HandleSink.open
