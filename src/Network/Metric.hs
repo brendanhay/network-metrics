@@ -40,7 +40,7 @@ data SinkType =
     | Graphite
     | Statsd
     | Stdout
-      deriving (Data, Typeable, Show)
+      deriving (Eq, Data, Typeable, Read, Show)
 
 --
 -- API
