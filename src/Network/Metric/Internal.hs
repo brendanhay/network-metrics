@@ -68,7 +68,7 @@ data Metric
     = Counter Group Bucket Integer
     | Timer Group Bucket Double
     | Gauge Group Bucket Double
-      deriving (Show)
+      deriving (Show, Eq)
 
 --
 -- Type Classes
