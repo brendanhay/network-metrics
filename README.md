@@ -88,4 +88,4 @@ For any problems, comments or feedback please create an issue [here on GitHub](g
 Licence
 -------
 
-Stetson is released under the [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/)
+network-metrics is released under the [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/)
