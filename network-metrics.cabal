@@ -1,5 +1,5 @@
 name:               network-metrics
-version:            0.2.3
+version:            0.2.4
 synopsis:           Send metrics to Ganglia, Graphite, and statsd.
 license:            OtherLicense
 license-file:       LICENSE
@@ -33,7 +33,7 @@ library
                   , Network.Metric.Sink.Graphite
                   , Network.Metric.Sink.Statsd
                   , Network.Metric.Sink.Handle
-  other-modules:    Network.Metric.Internal
+                  , Network.Metric.Internal
 
   hs-source-dirs:   src
 
