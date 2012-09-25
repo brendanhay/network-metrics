@@ -79,7 +79,7 @@ instance Default GangliaMetric where
 data Ganglia = Ganglia Host Handle deriving (Show)
 
 instance Sink Ganglia where
-    push (Ganglia host hd) = mapM_ (hPush hd . enc) . measure
+    push (Ganglia host hd) m = mapM_ (hPush hd) (concat . map enc $ measure m)
       where
         enc (Counter g b v) = put host g b v Positive
         enc (Timer g b v)   = put host g b v Both
@@ -108,7 +108,7 @@ defaultMetric = GangliaMetric
 
 -- | Open a new Ganglia sink
 open :: Host -> HostName -> PortNumber -> IO AnySink
-open host = fOpen (Ganglia host) Stream
+open host = fOpen (Ganglia host) Datagram
 
 -- | Encode a GangliaMetric's metadata into a Binary.Put monad
 --
@@ -149,9 +149,8 @@ put :: Encodable a
     -> Bucket
     -> a
     -> Slope
-    -> BL.ByteString
-put host group bucket value slope =
-    BL.concat $ map run [putMetaData, putValue]
+    -> [BL.ByteString]
+put host group bucket value slope = map run [putMetaData, putValue]
   where
      run f  = runPut $ f metric
      metric = defaultMetric
