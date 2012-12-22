@@ -45,7 +45,7 @@ module Network.Metric.Internal (
 
 import Control.Monad                  (liftM, unless)
 import Data.Typeable                  (Typeable)
-import Network.Socket                 hiding (send)
+import Network.Socket                 hiding (send, close)
 import Network.Socket.ByteString.Lazy (send)
 import Text.Printf                    (printf)
 
