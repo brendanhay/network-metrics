@@ -15,16 +15,11 @@ module Main (
     ) where
 
 
-import Control.Monad            (liftM, when)
-import Data.Binary.Put          (runPut)
-import Data.Word                (Word16)
-import Network.Socket           (SocketType(..))
+import Control.Monad          (when)
 import System.Console.CmdArgs
-import System.Environment       (getArgs, withArgs)
-import System.Exit              (ExitCode(..), exitWith)
-import Network.Metric.Internal
+import System.Environment     (getArgs, withArgs)
+import System.Exit            (ExitCode(..), exitWith)
 
-import qualified Data.ByteString.Char8       as BS
 import qualified Network.Metric.Sink.Ganglia as G
 
 data Options = Options
