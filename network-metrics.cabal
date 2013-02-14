@@ -3,8 +3,8 @@ version:            0.2.8
 synopsis:           Send metrics to Ganglia, Graphite, and statsd.
 license:            OtherLicense
 license-file:       LICENSE
-author:             Brendan Hay <brendan@soundcloud.com>
-maintainer:         Brendan Hay <brendan@soundcloud.com>
+author:             Brendan Hay <brendan.g.hay@gmail.com>
+maintainer:         Brendan Hay <brendan.g.hay@gmail.com>
 homepage:           http://github.com/brendanhay/network-metrics
 bug-reports:        http://github.com/brendanhay/network-metrics/issues
 category:           Metrics, Monitoring
