@@ -34,8 +34,9 @@ data Graphite = Graphite Host Handle deriving (Show)
 instance Sink Graphite where
     push (Graphite host hd) m = do
         time <- getPOSIXTime
-        mapM_ (hPush hd . enc time) (measure m)
+        mapM_ (hPush hd . flat . enc time) (measure m)
       where
+        flat s = BL.fromChunks [BS.intercalate " " $ BL.toChunks s]
         enc t (Counter g b v) = put host g b v t
         enc t (Timer g b v)   = put host g b v t
         enc t (Gauge g b v)   = put host g b v t
@@ -63,7 +64,12 @@ put :: Encodable a
     -> POSIXTime
     -> BL.ByteString
 put host group bucket value time =
-    BL.fromChunks [key host group bucket, encode value, timestamp]
+    BL.fromChunks [key host (safe group) bucket, encode value, timestamp]
   where
     timestamp = BS.pack $ show (truncate time :: Integer)
 
+safe :: BS.ByteString -> BS.ByteString
+safe = BS.map fn
+  where
+    fn ' ' = '.'
+    fn c   = c
