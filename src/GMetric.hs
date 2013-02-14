@@ -1,11 +1,11 @@
 -- |
 -- Module      : GMetric.Main
--- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
+-- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
 --               A copy of the MPL can be found in the LICENSE file or
 --               you can obtain it at http://mozilla.org/MPL/2.0/.
--- Maintainer  : Brendan Hay <brendan@soundcloud.com>
+-- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
 --
@@ -81,7 +81,7 @@ programName, programVersion, programInfo, copyright :: String
 programName    = "gmetric-haskell"
 programVersion = "0.1.0"
 programInfo    = programName ++ " version " ++ programVersion
-copyright      = "(C) Brendan Hay <brendan@soundcloud.com> 2012"
+copyright      = "(C) Brendan Hay <brendan.g.hay@gmail.com> 2012-2013"
 
 parse :: IO Options
 parse = do
