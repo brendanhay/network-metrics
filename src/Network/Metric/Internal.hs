@@ -2,12 +2,12 @@
 
 -- |
 -- Module      : Network.Metric.Internal
--- Copyright   : (c) 2012 Brendan Hay <brendan@soundcloud.com>
+-- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
 --               the Mozilla Public License, v. 2.0.
 --               A copy of the MPL can be found in the LICENSE file or
 --               you can obtain it at http://mozilla.org/MPL/2.0/.
--- Maintainer  : Brendan Hay <brendan@soundcloud.com>
+-- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
 --
@@ -39,21 +39,21 @@ module Network.Metric.Internal (
     , hPush
 
     -- * Re-exports
-    , HostName
-    , PortNumber(..)
+    , S.HostName
+    , S.PortNumber(..)
     ) where
 
-import Control.Monad                  (liftM, unless)
-import Data.Typeable                  (Typeable)
-import Network.Socket                 hiding (send, close)
-import Network.Socket.ByteString.Lazy (send)
-import Text.Printf                    (printf)
+import Control.Monad (liftM, unless)
+import Data.Typeable (Typeable)
+import Text.Printf   (printf)
 
-import qualified Data.ByteString.Char8      as BS
-import qualified Data.ByteString.Lazy.Char8 as BL
+import qualified Data.ByteString.Char8          as BS
+import qualified Data.ByteString.Lazy.Char8     as BL
+import qualified Network.Socket                 as S
+import qualified Network.Socket.ByteString.Lazy as SBL
 
 -- | Socket handle
-data Handle = Handle Socket SockAddr deriving (Show)
+data Handle = Handle S.Socket S.SockAddr deriving (Show)
 
 -- | Metric host
 type Host = BS.ByteString
@@ -139,27 +139,27 @@ key h g b = BS.intercalate "." [h, g, b]
 -- | Helper to curry a constructor function for a sink
 fOpen :: Sink a
       => (Handle -> a)
-      -> SocketType
-      -> HostName
-      -> PortNumber
+      -> S.SocketType
+      -> S.HostName
+      -> S.PortNumber
       -> IO AnySink
 fOpen ctor typ host port = liftM (AnySink . ctor) (hOpen typ host port)
 
 -- | Create a new socket handle (in a disconnected state) for UDP communication
-hOpen :: SocketType -> HostName -> PortNumber -> IO Handle
-hOpen typ host (PortNum port) = do
-    (addr:_) <- getAddrInfo Nothing (Just host) (Just $ show port)
-    sock     <- socket (addrFamily addr) typ defaultProtocol
-    return $ Handle sock (addrAddress addr)
+hOpen :: S.SocketType -> S.HostName -> S.PortNumber -> IO Handle
+hOpen typ host (S.PortNum port) = do
+    (addr:_) <- S.getAddrInfo Nothing (Just host) (Just $ show port)
+    sock     <- S.socket (S.addrFamily addr) typ S.defaultProtocol
+    return $ Handle sock (S.addrAddress addr)
 
 -- | Close a socket handle
 hClose :: Handle -> IO ()
-hClose (Handle sock _) = sClose sock
+hClose (Handle sock _) = S.sClose sock
 
 -- | Direct access for writing a bytestring to a socket handle
 hPush :: Handle -> BL.ByteString -> IO ()
 hPush (Handle sock addr) bstr | BL.null bstr = return ()
                               | otherwise    = do
-    sIsConnected sock >>= \b -> unless b $ connect sock addr
-    _ <- send sock bstr
+    S.sIsConnected sock >>= \b -> unless b $ S.connect sock addr
+    _ <- SBL.send sock bstr
     return ()
