@@ -40,11 +40,12 @@ module Network.Metric.Internal (
 
     -- * Re-exports
     , S.HostName
-    , S.PortNumber(..)
+    , S.PortNumber
     ) where
 
 import Control.Monad (liftM, unless)
 import Data.Typeable (Typeable)
+import Data.Word     (Word16)
 import Text.Printf   (printf)
 
 import qualified Data.ByteString.Char8          as BS
@@ -147,10 +148,13 @@ fOpen ctor typ host port = liftM (AnySink . ctor) (hOpen typ host port)
 
 -- | Create a new socket handle (in a disconnected state) for UDP communication
 hOpen :: S.SocketType -> S.HostName -> S.PortNumber -> IO Handle
-hOpen typ host (S.PortNum port) = do
-    (addr:_) <- S.getAddrInfo Nothing (Just host) (Just $ show port)
+hOpen typ host port = do
+    (addr:_) <- S.getAddrInfo Nothing (Just host) (Just . show . p2w $ port)
     sock     <- S.socket (S.addrFamily addr) typ S.defaultProtocol
     return $ Handle sock (S.addrAddress addr)
+  where
+    p2w :: S.PortNumber -> Word16
+    p2w = fromIntegral
 
 -- | Close a socket handle
 hClose :: Handle -> IO ()
