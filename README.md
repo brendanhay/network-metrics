@@ -6,7 +6,6 @@ Table of Contents
 
 * [Usage](#usage)
 * [API](#api)
-* [GMetric](#gmetric)
 * [Contribute](#contribute)
 * [Licence](#licence)
 
@@ -65,14 +64,6 @@ API
 Preliminary API documentation is available [on Hackage](http://hackage.haskell.org/package/network-metrics).
 
 > The API is currently in flux, and conversion between the universal `Counter`, `Gauge`, and `Timing` ctors to the respective sink types is not yet completed.
-
-
-<a name="gmetric" />
-
-GMetric
--------
-
-A port of Ganglia's `gmetric` is built by default under the name `gmetric-haskell`.
 
 
 <a name="contribute" />
