@@ -34,7 +34,7 @@ data Graphite = Graphite Host Handle deriving (Show)
 instance Sink Graphite where
     push (Graphite host hd) m = do
         time <- getPOSIXTime
-        mapM_ (hPush hd . flat . enc time) (measure m)
+        mapM_ (hPush hd . (`BL.append` "\n") . flat . enc time) (measure m)
       where
         flat s = BL.fromChunks [BS.intercalate " " $ BL.toChunks s]
         enc t (Counter g b v) = put host g b v t
