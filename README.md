@@ -34,7 +34,7 @@ Supported Sinks:
 import Network.Metric
 
 main = do
-    sink <- open Ganglia "localhost" "1234"
+    sink <- open Ganglia "this host" "localhost" "1234"
     -- Creates ganglia key: "name.space.bucket" with an "int32" type
     push sink $ Counter "name.space" "bucket" 1234
     close sink
@@ -49,7 +49,7 @@ main = do
 import Network.Metric.Sink.Graphite
 
 main = do
-    sink <- open "localhost" "1234"
+    sink <- open "this host" "localhost" "1234"
     -- Creates graphite key: "name.space.bucket"
     push sink $ Counter "name.space" "bucket" 1234
     close sink
