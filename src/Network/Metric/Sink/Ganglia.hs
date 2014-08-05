@@ -40,6 +40,7 @@ import Data.Char                (toLower)
 import Data.Data                (Data)
 import Data.Default             (Default, def)
 import Data.Int                 (Int32)
+import Data.Maybe               (fromMaybe)
 import Data.Typeable            (Typeable, typeOf)
 import Data.Word                (Word32)
 import Network.Socket           (SocketType(..))
@@ -79,7 +80,7 @@ instance Default GangliaMetric where
 data Ganglia = Ganglia (Maybe Host) Handle deriving (Show)
 
 instance Sink Ganglia where
-    push (Ganglia host hd) m = mapM_ (hPush hd) (concat . map enc $ measure m)
+    push (Ganglia host hd) m = mapM_ (hPush hd) (concatMap enc $ measure m)
       where
         enc (Counter g b v) = put host g b v Positive
         enc (Timer g b v)   = put host g b v Both
@@ -151,9 +152,7 @@ put host group bucket value slope = map run [putMetaData, putValue]
      metric = defaultMetric
          { name  = bucket
          , group = group
-         , host  = case host of
-                       Nothing -> ""
-                       Just h  -> h
+         , host  = fromMaybe "" host
          , value = encode value
          , type' = determineType value
          , slope = slope

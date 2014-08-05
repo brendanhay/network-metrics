@@ -110,7 +110,7 @@ instance Measurable AnyMeasurable where
     measure (AnyMeasurable m) = measure m
 
 instance Measurable Metric where
-    measure = flip (:) [] . id
+    measure = flip (:) []
 
 instance Encodable Int where
     encode = BS.pack . show
