@@ -4,8 +4,6 @@ Network.Metric
 Table of Contents
 -----------------
 
-* [Usage](#usage)
-* [API](#api)
 * [Contribute](#contribute)
 * [Licence](#licence)
 
@@ -64,7 +62,6 @@ API
 Preliminary API documentation is available [on Hackage](http://hackage.haskell.org/package/network-metrics).
 
 > The API is currently in flux, and conversion between the universal `Counter`, `Gauge`, and `Timing` ctors to the respective sink types is not yet completed.
-
 
 <a name="contribute" />
 
