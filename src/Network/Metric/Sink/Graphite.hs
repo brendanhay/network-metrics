@@ -29,7 +29,7 @@ import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
 
 -- | A handle to a Graphite sink
-data Graphite = Graphite Host Handle deriving (Show)
+data Graphite = Graphite (Maybe Host) Handle deriving (Show)
 
 instance Sink Graphite where
     push (Graphite host hd) m = do
@@ -48,7 +48,7 @@ instance Sink Graphite where
 --
 
 -- | Open a new Graphite sink
-open :: Host -> HostName -> PortNumber -> IO AnySink
+open :: Maybe Host -> HostName -> PortNumber -> IO AnySink
 open host = fOpen (Graphite host) Stream
 
 --
@@ -57,7 +57,7 @@ open host = fOpen (Graphite host) Stream
 
 -- | Encode a metric into the Graphite format
 put :: Encodable a
-    => Host
+    => Maybe Host
     -> Group
     -> Bucket
     -> a

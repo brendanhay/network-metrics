@@ -26,7 +26,7 @@ import Network.Metric.Internal
 import qualified Data.ByteString.Char8 as BS
 
 -- | A generic sink handle
-data SinkHandle = SinkHandle Host (String -> IO ())
+data SinkHandle = SinkHandle (Maybe Host) (String -> IO ())
 
 instance Sink SinkHandle where
     push h = mapM_ enc . measure

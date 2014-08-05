@@ -33,7 +33,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 data Sampled = Sampled | Exact | Ignore
 
 -- | A handle to a Statsd sink
-data Statsd = Statsd Host Handle deriving (Show)
+data Statsd = Statsd (Maybe Host) Handle deriving (Show)
 
 instance Sink Statsd where
     push (Statsd host hd) m = mapM enc (measure m) >>= mapM_ (hPush hd)
@@ -49,7 +49,7 @@ instance Sink Statsd where
 --
 
 -- | Open a new Statsd sink
-open :: Host -> HostName -> PortNumber -> IO AnySink
+open :: Maybe Host -> HostName -> PortNumber -> IO AnySink
 open host = fOpen (Statsd host) Datagram
 
 --
@@ -58,7 +58,7 @@ open host = fOpen (Statsd host) Datagram
 -- | Encode a metric into the Statsd format
 -- *TODO:* Currently statsd sampling is not exposed via the global metric type
 put :: Encodable a
-    => Host
+    => Maybe Host
     -> Group
     -> Bucket
     -> a
