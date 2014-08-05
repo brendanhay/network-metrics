@@ -37,7 +37,7 @@ module Network.Metric.Sink.Ganglia (
 import Data.Binary.Put
 import Data.Bits                ((.&.))
 import Data.Char                (toLower)
-import Data.Data                (Data, Typeable)
+import Data.Data                (Data)
 import Data.Default             (Default, def)
 import Data.Int                 (Int32)
 import Data.Typeable            (Typeable, typeOf)
