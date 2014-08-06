@@ -110,7 +110,7 @@ instance Measurable AnyMeasurable where
     measure (AnyMeasurable m) = measure m
 
 instance Measurable Metric where
-    measure = flip (:) [] . id
+    measure = flip (:) []
 
 instance Encodable Int where
     encode = BS.pack . show
@@ -134,8 +134,9 @@ instance Sink AnySink where
 --
 
 -- | Combine a Host, Group and Bucket into a single key
-key :: Host -> Group -> Bucket -> BS.ByteString
-key h g b = BS.intercalate "." [h, g, b]
+key :: Maybe Host -> Group -> Bucket -> BS.ByteString
+key (Just h) g b = BS.intercalate "." [h, g, b]
+key Nothing g b  = BS.intercalate "." [g, b]
 
 -- | Helper to curry a constructor function for a sink
 fOpen :: Sink a

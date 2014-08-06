@@ -47,7 +47,7 @@ data SinkType =
 --
 
 -- | Open a new sink specified by SinkType
-open :: SinkType -> Host -> HostName -> PortNumber -> IO AnySink
+open :: SinkType -> Maybe Host -> HostName -> PortNumber -> IO AnySink
 open Ganglia  = GangliaSink.open
 open Graphite = GraphiteSink.open
 open Statsd   = StatsdSink.open
