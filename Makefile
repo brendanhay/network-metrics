@@ -1,28 +1,17 @@
-CABAL=`which cabal-dev`
-
-#
-# Targets
-#
-
-.PHONY: build install conf clean doc package
-
-all: build
+FLAGS := -j --disable-documentation --disable-library-coverage
 
 build:
-	$(CABAL) build
+	cabal build $(addprefix -,$(findstring j,$(MAKEFLAGS)))
 
-install:
-	$(CABAL) install
-
-conf:
-	$(CABAL) configure
+install: cabal.sandbox.config
+	cabal install $(FLAGS) --only-dependencies
 
 clean:
-	$(CABAL) clean
+	cabal clean
+	rm -rf cabal.sandbox.config .cabal-sandbox
 
 doc:
-	$(CABAL) haddock
+	cabal haddock
 
-package: clean install doc
-	$(CABAL) sdist
-
+cabal.sandbox.config:
+	cabal sandbox init
