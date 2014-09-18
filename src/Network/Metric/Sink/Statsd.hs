@@ -65,24 +65,15 @@ put :: Encodable a
     -> BS.ByteString
     -> Double
     -> IO BL.ByteString
-put host group bucket value typ rate = liftM (BL.fromChunks . bstr) (sample rate)
+put host group bucket value typ rate = liftM bstr (randomRIO (0.0, 1.0))
   where
-    base = [key host group bucket, ":", encode value, "|", typ]
-    bstr Sampled = base ++ ["@", BS.pack $ show rate]
-    bstr Exact   = base
-    bstr Ignore  = []
+    base   = [key host group bucket, ":", encode value, "|", typ]
+    bstr n = BL.fromChunks $ case sample rate n of
+        Sampled -> base ++ ["@", BS.pack $ show rate]
+        Exact   -> base
+        Ignore  -> []
 
--- NOTE: The bizarre type and branching logic of this function is entirely
--- for the purpose of hiding the 'randomRIO' call behind the rate < 1.0
--- condition (which currently will always be False).  This is to sidestep
--- a bug in random <=1.0.1.1 in which the 'randomRIO' function has a space leak.
---
--- There is a far saner, pure version of this function that should probably
--- be resurrected when the bug in the random package is fixed.
-sample :: Double -> IO Sampled
-sample rate
-  | rate < 1.0   = do
-      r <- randomRIO (0.0, 1.0)
-      return $ if r <= rate then Sampled else Ignore
-  | rate == 1.0  = return Exact
-  | otherwise    = return Ignore
+sample :: Double -> Double -> Sampled
+sample rate rand | rate < 1.0 && rand <= rate = Sampled
+                 | rate == 1.0                = Exact
+                 | otherwise                  = Ignore

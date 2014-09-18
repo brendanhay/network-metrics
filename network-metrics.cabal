@@ -53,5 +53,5 @@ library
                   , binary
                   , bytestring
                   , data-default
-                  , random
+                  , random >= 1.1
                   , time
