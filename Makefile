@@ -1,10 +1,12 @@
-FLAGS := -j --disable-documentation --disable-library-coverage
+SHELL := /usr/bin/env bash
 
 build:
 	cabal build $(addprefix -,$(findstring j,$(MAKEFLAGS)))
 
 install: cabal.sandbox.config
-	cabal install $(FLAGS) --only-dependencies
+	cabal install  -j \
+ --disable-documentation \
+ --only-dependencies
 
 clean:
 	cabal clean
