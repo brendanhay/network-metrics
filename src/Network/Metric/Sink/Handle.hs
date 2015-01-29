@@ -1,4 +1,3 @@
--- |
 -- Module      : Network.Metric.Sink.Handle
 -- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
@@ -8,7 +7,6 @@
 -- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
---
 
 module Network.Metric.Sink.Handle (
     -- * Exported Types
@@ -21,9 +19,9 @@ module Network.Metric.Sink.Handle (
     , Sink(..)
     ) where
 
-import Network.Metric.Internal
+import           Network.Metric.Internal
 
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Char8   as BS
 
 -- | A generic sink handle
 data SinkHandle = SinkHandle (Maybe Host) (String -> IO ())
@@ -36,10 +34,6 @@ instance Sink SinkHandle where
         enc (Gauge g b v)   = put "Gauge" h g b v
 
     close _ = return ()
-
---
--- Private
---
 
 put :: Encodable a
     => BS.ByteString

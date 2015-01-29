@@ -1,4 +1,3 @@
--- |
 -- Module      : Network.Metric.Sink.Graphite
 -- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
@@ -8,7 +7,6 @@
 -- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
---
 
 module Network.Metric.Sink.Graphite (
     -- * Sink Functions
@@ -21,9 +19,9 @@ module Network.Metric.Sink.Graphite (
     , Metric(..)
     ) where
 
-import Data.Time.Clock.POSIX   (POSIXTime, getPOSIXTime)
-import Network.Socket          (SocketType(..))
-import Network.Metric.Internal
+import           Data.Time.Clock.POSIX      (POSIXTime, getPOSIXTime)
+import           Network.Metric.Internal
+import           Network.Socket             (SocketType (..))
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
@@ -43,17 +41,9 @@ instance Sink Graphite where
 
     close (Graphite _ hd) = hClose hd
 
---
--- API
---
-
 -- | Open a new Graphite sink
 open :: Maybe Host -> HostName -> PortNumber -> IO AnySink
 open host = fOpen (Graphite host) Stream
-
---
--- Private
---
 
 -- | Encode a metric into the Graphite format
 put :: Encodable a

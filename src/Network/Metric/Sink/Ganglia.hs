@@ -1,4 +1,3 @@
--- |
 -- Module      : Network.Metric.Sink.Ganglia
 -- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
@@ -8,7 +7,6 @@
 -- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
---
 
 module Network.Metric.Sink.Ganglia (
     -- * Exported Types
@@ -88,10 +86,6 @@ instance Sink Ganglia where
 
     close (Ganglia _ hd) = hClose hd
 
---
--- API
---
-
 -- | Sensible defaults for a GangliaMetric
 defaultMetric :: GangliaMetric
 defaultMetric = GangliaMetric
@@ -133,10 +127,6 @@ putValue m@GangliaMetric{..} = do
     putHeader 133 m -- 133 = string_msg
     putString "%s"
     putString value
-
---
--- Private
---
 
 -- | Oh, the horror
 put :: Encodable a

@@ -1,4 +1,3 @@
--- |
 -- Module      : Network.Metric.Sink.Statsd
 -- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
@@ -8,7 +7,6 @@
 -- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
---
 
 module Network.Metric.Sink.Statsd (
     -- * Sink Functions
@@ -21,10 +19,10 @@ module Network.Metric.Sink.Statsd (
     , AnySink(..)
     ) where
 
-import Control.Monad            (liftM)
-import Network.Socket           (SocketType(..))
-import System.Random            (randomRIO)
-import Network.Metric.Internal
+import           Control.Monad              (liftM)
+import           Network.Metric.Internal
+import           Network.Socket             (SocketType (..))
+import           System.Random              (randomRIO)
 
 import qualified Data.ByteString.Char8      as BS
 import qualified Data.ByteString.Lazy.Char8 as BL
@@ -44,17 +42,10 @@ instance Sink Statsd where
 
     close (Statsd _ hd) = hClose hd
 
---
--- API
---
-
 -- | Open a new Statsd sink
 open :: Maybe Host -> HostName -> PortNumber -> IO AnySink
 open host = fOpen (Statsd host) Datagram
 
---
--- Private
---
 -- | Encode a metric into the Statsd format
 -- *TODO:* Currently statsd sampling is not exposed via the global metric type
 put :: Encodable a

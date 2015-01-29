@@ -1,4 +1,3 @@
--- |
 -- Module      : Network.Metric
 -- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
@@ -26,13 +25,13 @@ module Network.Metric (
     , open
     ) where
 
-import Data.Data               (Data, Typeable)
-import Network.Metric.Internal
+import           Data.Data                    (Data, Typeable)
+import           Network.Metric.Internal
 
 import qualified Network.Metric.Sink.Ganglia  as GangliaSink
 import qualified Network.Metric.Sink.Graphite as GraphiteSink
-import qualified Network.Metric.Sink.Statsd   as StatsdSink
 import qualified Network.Metric.Sink.Handle   as H
+import qualified Network.Metric.Sink.Statsd   as StatsdSink
 
 -- | An enumeration of supplied sink types
 data SinkType =
@@ -41,10 +40,6 @@ data SinkType =
     | Statsd
     | Stdout
       deriving (Eq, Data, Typeable, Read, Show)
-
---
--- API
---
 
 -- | Open a new sink specified by SinkType
 open :: SinkType -> Maybe Host -> HostName -> PortNumber -> IO AnySink

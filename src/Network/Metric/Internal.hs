@@ -1,6 +1,5 @@
 {-# LANGUAGE ExistentialQuantification #-}
 
--- |
 -- Module      : Network.Metric.Internal
 -- Copyright   : (c) 2012-2013 Brendan Hay <brendan.g.hay@gmail.com>
 -- License     : This Source Code Form is subject to the terms of
@@ -10,7 +9,6 @@
 -- Maintainer  : Brendan Hay <brendan.g.hay@gmail.com>
 -- Stability   : experimental
 -- Portability : non-portable (GHC extensions)
---
 
 module Network.Metric.Internal (
     -- * Exported Types
@@ -43,10 +41,10 @@ module Network.Metric.Internal (
     , S.PortNumber
     ) where
 
-import Control.Monad (liftM, unless)
-import Data.Typeable (Typeable)
-import Data.Word     (Word16)
-import Text.Printf   (printf)
+import           Control.Monad                  (liftM, unless)
+import           Data.Typeable                  (Typeable)
+import           Data.Word                      (Word16)
+import           Text.Printf                    (printf)
 
 import qualified Data.ByteString.Char8          as BS
 import qualified Data.ByteString.Lazy.Char8     as BL
@@ -71,10 +69,6 @@ data Metric
     | Gauge Group Bucket Double
       deriving (Show, Eq)
 
---
--- Type Classes
---
-
 -- | Measure a type for a collection of metrics
 class Measurable a where
     -- | Convert a measurable instance from a host into a list of metrics
@@ -92,19 +86,11 @@ class Sink a where
     -- | Close the sink - subsequent writes will throw an error.
     close :: a -> IO ()
 
---
--- Existential Types
---
-
 -- | Any instance of the Measurable type class
 data AnyMeasurable = forall a. Measurable a => AnyMeasurable a
 
 -- | Any instance of the Sink type class
 data AnySink = forall a. Sink a => AnySink a
-
---
--- Instances
---
 
 instance Measurable AnyMeasurable where
     measure (AnyMeasurable m) = measure m
@@ -128,10 +114,6 @@ instance Encodable String where
 instance Sink AnySink where
     push  (AnySink s) = push s
     close (AnySink s) = close s
-
---
--- API
---
 
 -- | Combine a Host, Group and Bucket into a single key
 key :: Maybe Host -> Group -> Bucket -> BS.ByteString
